@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query Solutions</title>
+</head>
+<body>
+    <h1>Selecciona las tablas para la consulta</h1>
+    <form method="POST">
+        <label>
+            <input type="checkbox" name="tables" value="CLL"> CLL
+        </label><br>
+        <label>
+            <input type="checkbox" name="tables" value="EG1"> EG1
+        </label><br>
+        <label>
+            <input type="checkbox" name="tables" value="EG2"> EG2
+        </label><br>
+        <label>
+            <input type="checkbox" name="tables" value="TCLL"> TCLL
+        </label><br>
+        <label>
+            <input type="checkbox" name="tables" value="TEG1"> TEG1
+        </label><br>
+        <label>
+            <input type="checkbox" name="tables" value="TEG2"> TEG2
+        </label><br>
+        <label>
+            <input type="checkbox" name="tables" value="LS"> LS
+        </label><br>
+        <label>
+            <input type="checkbox" name="tables" value="LSEG1"> LSEG1
+        </label><br>
+        <label>
+            <input type="checkbox" name="tables" value="LSEG2"> LSEG2
+        </label><br>
+        <label>
+            <input type="checkbox" name="tables" value="CBL"> CBL
+        </label><br>
+        <!-- Añade más opciones de tablas según sea necesario -->
+
+        <button type="submit">Consultar</button>
+    </form>
+
+    {% if results %}
+        <h2>Resultados</h2>
+        <table border="1">
+            <tr>
+                <th>State</th>
+                <th>Solutions</th>
+            </tr>
+            {% for row in results %}
+            <tr>
+                <td>{{ row[0] }}</td>
+                <td>{{ row[1] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+</body>
+</html>
