@@ -3,6 +3,12 @@ import numpy as np
 import TranslatedSolver as tr
 import _2x2Main as main
 import ast
+import hashlib
+
+def generate_image_name(state):
+    state_str = str(state)
+    return hashlib.md5(state_str.encode()).hexdigest() + ".png"
+
 
 def st2img(statel): # (B,G,R)
     if type(statel) == str:
@@ -84,8 +90,8 @@ def st2img(statel): # (B,G,R)
     cv.rectangle(scr, (marg+3*lenf+3*sep+lenf//2+3,mid+lenf//2-3), (marg+3*lenf+3*sep+2*lenf//2-3,mid+3), ind2col[st[23]], thickness=-1)
 
 
-
-    cv.imwrite('static/Images/'+str(state)+'.png',scr)
+    image_filename = generate_image_name(state)
+    cv.imwrite('static/Images/'+image_filename,scr)
     # cv.imshow('Dibujo2', scr)
     # cv.waitKey(0)
 
