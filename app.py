@@ -277,7 +277,10 @@ def query_missing_states(include_tables, exclude_tables, page_number=1, page_siz
 
         missing_states = included_states - excluded_states
 
-        clear_image_folder(IMAGE_FOLDER)
+        if not os.path.exists(IMAGE_FOLDER):
+            os.makedirs(IMAGE_FOLDER)
+        else:
+            clear_image_folder(IMAGE_FOLDER)
 
         if missing_states:
             missing_states_list = list(missing_states)
