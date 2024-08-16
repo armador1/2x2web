@@ -102,7 +102,23 @@
         </form>
     </div>
 
-    <!-- Resultados de Estados Faltantes -->
+    <form method="post" action="/">
+        <!-- Tu formulario actual para seleccionar tablas -->
+
+        <!-- Estos campos ocultos sólo se añaden para el manejo de paginación en GET -->
+        <input type="hidden" name="page" value="1"> <!-- Siempre comenzar en la página 1 -->
+
+        {% for table in include_tables %}
+            <input type="hidden" name="tables_include" value="{{ table }}">
+        {% endfor %}
+
+        {% for table in exclude_tables %}
+            <input type="hidden" name="tables_exclude" value="{{ table }}">
+        {% endfor %}
+
+        <!-- Botón de envío u otros elementos del formulario -->
+    </form>
+
     {% if results_missing_states %}
         <h2>Found states</h2>
         <table>
@@ -131,9 +147,20 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        <div style="text-align:center;">
+            {% if page_number > 1 %}
+                <a href="?page={{ page_number - 1 }}{% for table in include_tables %}&tables_include={{ table }}{% endfor %}{% for table in exclude_tables %}&tables_exclude={{ table }}{% endfor %}">Previous</a>
+            {% endif %}
+            <span>Page {{ page_number }}</span>
+            {% if results_missing_states|length == 50 %}
+                <a href="?page={{ page_number + 1 }}{% for table in include_tables %}&tables_include={{ table }}{% endfor %}{% for table in exclude_tables %}&tables_exclude={{ table }}{% endfor %}">Next</a>
+            {% endif %}
+        </div>
     {% else %}
         <p>Could not find states fulfilling the requirements.</p>
     {% endif %}
+
 
     {% if error %}
         <h3>Error: {{ error }}</h3>

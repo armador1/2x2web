@@ -144,10 +144,93 @@ def rotateSolution(solution):
 
     rotatedSolutionsStr = "\n".join(str(x) for x in rotatedSolutions)
 
-    return rotatedSolutionsStr  # Ejemplo: invertir el texto de la solución
+    return rotatedSolutionsStr
 
 
-def query_missing_states(include_tables, exclude_tables):
+# def query_missing_states(include_tables, exclude_tables):
+#     # Generar un alias dinámico para cada tabla
+#     def generate_table_aliases(tables):
+#         return {table: f"t{idx + 1}" for idx, table in enumerate(tables)}
+#
+#     include_aliases = generate_table_aliases(include_tables)
+#     exclude_aliases = generate_table_aliases(exclude_tables)
+#
+#     sql_query_include = "SELECT DISTINCT s.state FROM solutionsTable s"
+#     join_clauses_include = [f"JOIN {table} {alias} ON s.state = {alias}.state" for table, alias in
+#                             include_aliases.items()]
+#     if join_clauses_include:
+#         sql_query_include += " " + " ".join(join_clauses_include)
+#
+#     sql_query_exclude = None
+#     if exclude_aliases:
+#         sql_query_exclude = "SELECT DISTINCT s.state FROM solutionsTable s"
+#         join_clauses_exclude = [f"JOIN {table} {alias} ON s.state = {alias}.state" for table, alias in
+#                                 exclude_aliases.items()]
+#         if join_clauses_exclude:
+#             sql_query_exclude += " " + " ".join(join_clauses_exclude)
+#
+#     print("Include Query:", sql_query_include)
+#     print("Exclude Query:", sql_query_exclude)
+#
+#     conn = sqlite3.connect('oo.db')
+#     cursor = conn.cursor()
+#
+#     try:
+#         # Obtener estados incluidos
+#         cursor.execute(sql_query_include)
+#         included_states = set(row[0] for row in cursor.fetchall())
+#         print("Included States:", included_states)
+#
+#         excluded_states = set()
+#         if sql_query_exclude:
+#             # Obtener estados excluidos
+#             cursor.execute(sql_query_exclude)
+#             excluded_states = set(row[0] for row in cursor.fetchall())
+#             print("Excluded States:", excluded_states)
+#
+#         # Filtrar estados que están en las tablas incluidas pero no en las excluidas
+#         missing_states = included_states - excluded_states
+#         print("Missing States:", missing_states)
+#
+#         # Obtener detalles de los estados faltantes
+#         if missing_states:
+#             missing_states_list = list(missing_states)
+#             placeholders = ','.join('?' * len(missing_states_list))
+#             sql_details_query = f"""
+#                 SELECT s.state, s.solutions
+#                 FROM solutionsTable s
+#                 WHERE s.state IN ({placeholders})
+#             """
+#             print("Details Query:", sql_details_query)
+#             cursor.execute(sql_details_query, missing_states_list)
+#             results = cursor.fetchall()
+#
+#             print("Query Results:", results)
+#
+#             # Estructura de los resultados
+#             result_data = []
+#             for state, solutions_json in results:
+#                 solutions = json.loads(solutions_json)
+#                 image_path = f"{state}.png"  # Asume que el nombre de la imagen es el estado con extensión .png
+#                 image_url = url_for('static', filename=f'images/{image_path}')
+#                 result_data.append({
+#                     'state': state,
+#                     'solutions': solutions,
+#                     'image_url': image_url
+#                 })
+#
+#             return result_data
+#
+#         return []
+#     except sqlite3.Error as e:
+#         print(f"Error al ejecutar la consulta: {e}")
+#         return []
+#     finally:
+#         conn.close()
+
+
+# Función actualizada para manejar la paginación
+def query_missing_states(include_tables, exclude_tables, page_number=1, page_size=50):
     # Generar un alias dinámico para cada tabla
     def generate_table_aliases(tables):
         return {table: f"t{idx + 1}" for idx, table in enumerate(tables)}
@@ -156,43 +239,31 @@ def query_missing_states(include_tables, exclude_tables):
     exclude_aliases = generate_table_aliases(exclude_tables)
 
     sql_query_include = "SELECT DISTINCT s.state FROM solutionsTable s"
-    join_clauses_include = [f"JOIN {table} {alias} ON s.state = {alias}.state" for table, alias in
-                            include_aliases.items()]
+    join_clauses_include = [f"JOIN {table} {alias} ON s.state = {alias}.state" for table, alias in include_aliases.items()]
     if join_clauses_include:
         sql_query_include += " " + " ".join(join_clauses_include)
 
     sql_query_exclude = None
     if exclude_aliases:
         sql_query_exclude = "SELECT DISTINCT s.state FROM solutionsTable s"
-        join_clauses_exclude = [f"JOIN {table} {alias} ON s.state = {alias}.state" for table, alias in
-                                exclude_aliases.items()]
+        join_clauses_exclude = [f"JOIN {table} {alias} ON s.state = {alias}.state" for table, alias in exclude_aliases.items()]
         if join_clauses_exclude:
             sql_query_exclude += " " + " ".join(join_clauses_exclude)
-
-    print("Include Query:", sql_query_include)
-    print("Exclude Query:", sql_query_exclude)
 
     conn = sqlite3.connect('oo.db')
     cursor = conn.cursor()
 
     try:
-        # Obtener estados incluidos
         cursor.execute(sql_query_include)
         included_states = set(row[0] for row in cursor.fetchall())
-        print("Included States:", included_states)
 
         excluded_states = set()
         if sql_query_exclude:
-            # Obtener estados excluidos
             cursor.execute(sql_query_exclude)
             excluded_states = set(row[0] for row in cursor.fetchall())
-            print("Excluded States:", excluded_states)
 
-        # Filtrar estados que están en las tablas incluidas pero no en las excluidas
         missing_states = included_states - excluded_states
-        print("Missing States:", missing_states)
 
-        # Obtener detalles de los estados faltantes
         if missing_states:
             missing_states_list = list(missing_states)
             placeholders = ','.join('?' * len(missing_states_list))
@@ -200,18 +271,17 @@ def query_missing_states(include_tables, exclude_tables):
                 SELECT s.state, s.solutions 
                 FROM solutionsTable s
                 WHERE s.state IN ({placeholders})
+                LIMIT ? OFFSET ?
             """
-            print("Details Query:", sql_details_query)
-            cursor.execute(sql_details_query, missing_states_list)
+
+            offset = (page_number - 1) * page_size
+            cursor.execute(sql_details_query, missing_states_list + [page_size, offset])
             results = cursor.fetchall()
 
-            print("Query Results:", results)
-
-            # Estructura de los resultados
             result_data = []
             for state, solutions_json in results:
                 solutions = json.loads(solutions_json)
-                image_path = f"{state}.png"  # Asume que el nombre de la imagen es el estado con extensión .png
+                image_path = f"{state}.png"
                 image_url = url_for('static', filename=f'images/{image_path}')
                 result_data.append({
                     'state': state,
@@ -231,24 +301,34 @@ def query_missing_states(include_tables, exclude_tables):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    if request.method == 'POST':
+        page_number = 1  # Resetear a la primera página en una nueva consulta
+        include_tables = request.form.getlist('tables_include')
+        exclude_tables = request.form.getlist('tables_exclude')
+    else:
+        page_number = int(request.args.get('page', 1))
+        include_tables = request.args.getlist('tables_include')
+        exclude_tables = request.args.getlist('tables_exclude')
+
     results_missing_states = None
     error = None
 
-    if request.method == 'POST':
-        include_tables = request.form.getlist('tables_include')
-        exclude_tables = request.form.getlist('tables_exclude')
-
-        if include_tables:
-            try:
-                results_missing_states = query_missing_states(include_tables, exclude_tables)
-            except Exception as e:
-                error = str(e)
-        else:
+    if include_tables:
+        try:
+            results_missing_states = query_missing_states(include_tables, exclude_tables, page_number)
+        except Exception as e:
+            error = str(e)
+    else:
+        if request.method == 'POST':
             error = "Debe seleccionar al menos una tabla para incluir."
 
     return render_template('index.html',
                            results_missing_states=results_missing_states,
-                           error=error)
+                           error=error,
+                           page_number=page_number,
+                           include_tables=include_tables,
+                           exclude_tables=exclude_tables)
+
 
 @app.route('/rotate_solution')
 def rotate_solution():
