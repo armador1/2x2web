@@ -3,19 +3,22 @@ import sqlite3
 import json
 from ScrImg import st2img, generate_image_name
 import os
-import shutil
+import re
+
+
 app = Flask(__name__)
 
-# Ruta a la carpeta de imágenes
-IMAGE_FOLDER = 'static/Images/'
 
-import re
+# Ruta a la carpeta de imágenes
+IMAGE_FOLDER = 'static/images/'
+
 
 def clear_image_folder(folder_path):
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)
         if os.path.isfile(file_path):
             os.remove(file_path)
+
 
 def new_orientation(alg, rotation):
     # Remove spaces and replace sequences in `alg`
@@ -98,60 +101,59 @@ def new_orientation(alg, rotation):
 
 
 def rotateSolution(solution):
-    rotatedSolutions = []
-    rotatedSolutions.append(solution)
+    rotated_solutions = [solution]
     solution = new_orientation(solution, "z")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "z")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "z")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "x")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "z")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "z")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "z")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "x")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "z")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "z")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "z")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "x'")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "z")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "z")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "z")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "x'")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "z")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "z")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "z")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "x")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "z")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "z")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
     solution = new_orientation(solution, "z")
-    rotatedSolutions.append(solution)
+    rotated_solutions.append(solution)
 
-    rotatedSolutions = list(set(rotatedSolutions))
+    rotated_solutions = list(set(rotated_solutions))
 
-    rotatedSolutionsStr = "\n".join(str(x) for x in rotatedSolutions)
+    rotated_solutions_str = "\n".join(str(x) for x in rotated_solutions)
 
-    return rotatedSolutionsStr
+    return rotated_solutions_str
 
 
 # def query_missing_states(include_tables, exclude_tables):
