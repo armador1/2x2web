@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify, url_for
 import sqlite3
 import json
-from ScrImg import st2img, generate_image_name
+from ScrImg import st2img
 import os
 import re
 
@@ -240,7 +240,6 @@ def rotateSolution(solution):
 
 # Función actualizada para manejar la paginación
 def query_missing_states(include_tables, exclude_tables, page_number=1, page_size=50):
-    # Generar un alias dinámico para cada tabla
     def generate_table_aliases(tables):
         return {table: f"t{idx + 1}" for idx, table in enumerate(tables)}
 
@@ -279,9 +278,10 @@ def query_missing_states(include_tables, exclude_tables, page_number=1, page_siz
             missing_states_list = list(missing_states)
             placeholders = ','.join('?' * len(missing_states_list))
             sql_details_query = f"""
-                SELECT s.state, s.solutions 
+                SELECT s.state, s.solutions, s.moves 
                 FROM solutionsTable s
                 WHERE s.state IN ({placeholders})
+                ORDER BY s.moves ASC
                 LIMIT ? OFFSET ?
             """
 
@@ -290,17 +290,17 @@ def query_missing_states(include_tables, exclude_tables, page_number=1, page_siz
             results = cursor.fetchall()
 
             result_data = []
-            for state, solutions_json in results:
+            for state, solutions_json, moves in results:
                 solutions = json.loads(solutions_json)
-                # Generar la imagen para cada estado
-                image_filename = generate_image_name(state)
+                image_filename = f"{state}.png"
                 image_path = os.path.join(IMAGE_FOLDER, image_filename)
-                st2img(state)  # Genera y guarda la imagen
+                st2img(state, IMAGE_FOLDER)  # Genera y guarda la imagen
                 image_url = url_for('static', filename=f'Images/{image_filename}')
                 result_data.append({
                     'state': state,
                     'solutions': solutions,
-                    'image_url': image_url
+                    'image_url': image_url,
+                    'moves': moves
                 })
 
             return result_data
