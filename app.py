@@ -253,10 +253,15 @@ def query_missing_states(include_tables, exclude_tables, page_number=1, page_siz
 
     sql_query_exclude = None
     if exclude_aliases:
-        sql_query_exclude = "SELECT DISTINCT s.state FROM solutionsTable s"
-        join_clauses_exclude = [f"JOIN {table} {alias} ON s.state = {alias}.state" for table, alias in exclude_aliases.items()]
+        sql_query_exclude = "SELECT DISTINCT s.* FROM solutionsTable s"
+        join_clauses_exclude = [f"LEFT JOIN {table} {alias} ON s.state = {alias}.state" for table, alias in
+                                exclude_aliases.items()]
+
         if join_clauses_exclude:
             sql_query_exclude += " " + " ".join(join_clauses_exclude)
+            # Asegurar que el registro esté en al menos una tabla
+            where_clauses = [f"{alias}.state IS NOT NULL" for alias in exclude_aliases.values()]
+            sql_query_exclude += " WHERE " + " OR ".join(where_clauses)
 
     conn = sqlite3.connect('oo.db')
     cursor = conn.cursor()
