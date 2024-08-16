@@ -1,14 +1,21 @@
 from flask import Flask, render_template, request, jsonify, url_for
 import sqlite3
 import json
-
+from ScrImg import st2img
+import os
+import shutil
 app = Flask(__name__)
 
 # Ruta a la carpeta de imágenes
-IMAGE_FOLDER = 'static/images/'
+IMAGE_FOLDER = 'static/Images/'
 
 import re
 
+def clear_image_folder(folder_path):
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
 
 def new_orientation(alg, rotation):
     # Remove spaces and replace sequences in `alg`
@@ -264,6 +271,8 @@ def query_missing_states(include_tables, exclude_tables, page_number=1, page_siz
 
         missing_states = included_states - excluded_states
 
+        clear_image_folder(IMAGE_FOLDER)
+
         if missing_states:
             missing_states_list = list(missing_states)
             placeholders = ','.join('?' * len(missing_states_list))
@@ -281,8 +290,11 @@ def query_missing_states(include_tables, exclude_tables, page_number=1, page_siz
             result_data = []
             for state, solutions_json in results:
                 solutions = json.loads(solutions_json)
-                image_path = f"{state}.png"
-                image_url = url_for('static', filename=f'images/{image_path}')
+                # Generar la imagen para cada estado
+                image_filename = f"{state}.png"
+                image_path = os.path.join(IMAGE_FOLDER, image_filename)
+                st2img(state)  # Genera y guarda la imagen
+                image_url = url_for('static', filename=f'images/{image_filename}')
                 result_data.append({
                     'state': state,
                     'solutions': solutions,
