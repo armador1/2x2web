@@ -189,6 +189,7 @@
                 <thead>
                     <tr>
                         <th>Image</th>
+                        <th>Moves</th>
                         <th>Solutions</th>
                     </tr>
                 </thead>
@@ -202,6 +203,7 @@
                                     No image available
                                 {% endif %}
                             </td>
+                            <td>{{ state.moves }}</td>
                             <td>
                                 {% for solution in state.solutions %}
                                     <div class="solution" data-solution="{{ solution }}">{{ solution }}</div><br>
@@ -211,6 +213,7 @@
                     {% endfor %}
                 </tbody>
             </table>
+
 
             <div class="pagination">
                 {% if page_number > 1 %}
