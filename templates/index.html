@@ -3,72 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Check states</title>
+    <title>Consulta de Estados</title>
+
+    <!-- CSS para estilizar la página -->
     <style>
-        /* Estilos para la tabla y otros elementos */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        h2 {
+            color: #007bff;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .form-group > div {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        select, input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 20px;
         }
+
         table, th, td {
-            border: 1px solid black;
+            border: 1px solid #ddd;
         }
+
         th, td {
-            padding: 8px;
-            text-align: left;
+            padding: 12px;
+            text-align: center;
         }
-        img {
-            max-width: 200px;
-            height: auto;
+
+        th {
+            background-color: #007bff;
+            color: white;
         }
-        pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
+
+        td img {
+            max-width: 300px; /* Ajusta este valor según tus necesidades */
+            height: auto; /* Mantiene la proporción de la imagen */
         }
+
+        .pagination {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .pagination a {
+            display: inline-block;
+            padding: 10px 15px;
+            margin: 0 5px;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+            color: #007bff;
+            text-decoration: none;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .pagination a:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .error {
+            color: red;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
         .solution {
-            cursor: pointer;
-            color: blue;
+            color: #007bff;
             text-decoration: underline;
+            cursor: pointer;
         }
 
-        /* Estilos para centrar el formulario */
-        .form-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh; /* Altura completa de la ventana */
-        }
-        form {
-            border: 1px solid #ccc;
-            padding: 20px;
-            border-radius: 10px;
-            background-color: #f9f9f9;
-        }
-
-        /* Estilos para organizar las opciones en columnas */
-        .checkboxes-container {
-            display: flex;
-            gap: 20px; /* Espacio entre las columnas */
-        }
-        .checkbox-column {
-            display: flex;
-            flex-direction: column;
+        .solution:hover {
+            color: #0056b3;
         }
     </style>
 </head>
 <body>
-    <h1 style="text-align: center;">Check states</h1>
 
-    <!-- Contenedor centrado -->
-    <div class="form-container">
-        <!-- Formulario para mostrar estados faltantes -->
-        <form method="POST" action="/">
-            <h2>Find states</h2>
+    <header>
+        <h1>Consulta de Estados Faltantes</h1>
+    </header>
 
-            <!-- Contenedor para organizar las opciones en columnas -->
-            <div class="checkboxes-container">
-                <div class="checkbox-column">
-                    <label>Including:</label><br>
+    <div class="container">
+        <form method="post" action="/">
+            <div class="form-group">
+                <div>
+                    <h3>Including:</h3>
                     <label><input type="checkbox" name="tables_include" value="CLL"> CLL</label><br>
                     <label><input type="checkbox" name="tables_include" value="EG1"> EG1</label><br>
                     <label><input type="checkbox" name="tables_include" value="EG2"> EG2</label><br>
@@ -80,9 +166,8 @@
                     <label><input type="checkbox" name="tables_include" value="LSEG2"> LSEG2</label><br>
                     <label><input type="checkbox" name="tables_include" value="CBL"> CBL</label><br>
                 </div>
-
-                <div class="checkbox-column">
-                    <label>Not including:</label><br>
+                <div>
+                    <h3>Excluding:</h3>
                     <label><input type="checkbox" name="tables_exclude" value="CLL"> CLL</label><br>
                     <label><input type="checkbox" name="tables_exclude" value="EG1"> EG1</label><br>
                     <label><input type="checkbox" name="tables_exclude" value="EG2"> EG2</label><br>
@@ -95,60 +180,56 @@
                     <label><input type="checkbox" name="tables_exclude" value="CBL"> CBL</label><br>
                 </div>
             </div>
-
-            <br>
-
-            <button type="submit">Check states</button>
+            <input type="submit" value="Consultar">
         </form>
+
+        {% if results_missing_states %}
+            <h2>Estados Encontrados</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Imagen</th>
+                        <th>Soluciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for state in results_missing_states %}
+                        <tr>
+                            <td>
+                                {% if state.image_url %}
+                                    <img src="{{ state.image_url }}" alt="Imagen de {{ state.state }}">
+                                {% else %}
+                                    No image available
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% for solution in state.solutions %}
+                                    <div class="solution" data-solution="{{ solution }}">{{ solution }}</div><br>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="pagination">
+                {% if page_number > 1 %}
+                    <a href="?page={{ page_number - 1 }}{% for table in include_tables %}&tables_include={{ table }}{% endfor %}{% for table in exclude_tables %}&tables_exclude={{ table }}{% endfor %}">Anterior</a>
+                {% endif %}
+                <span>Página {{ page_number }}</span>
+                {% if results_missing_states|length == 50 %}
+                    <a href="?page={{ page_number + 1 }}{% for table in include_tables %}&tables_include={{ table }}{% endfor %}{% for table in exclude_tables %}&tables_exclude={{ table }}{% endfor %}">Siguiente</a>
+                {% endif %}
+            </div>
+        {% else %}
+            <p>No se encontraron estados que cumplan los requisitos.</p>
+        {% endif %}
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
     </div>
 
-    {% if results_missing_states %}
-        <h2>Found states</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Image</th>
-                    <th>Solutions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for state in results_missing_states %}
-                    <tr>
-                        <td>
-                            {% if state.image_url %}
-                                <img src="{{ state.image_url }}" alt="Imagen de {{ state.state }}">
-                            {% else %}
-                                No image available
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% for solution in state.solutions %}
-                                <div class="solution" data-solution="{{ solution }}">{{ solution }}</div><br>
-                            {% endfor %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <div style="text-align:center; margin-top: 20px;">
-            {% if page_number > 1 %}
-                <a href="?page={{ page_number - 1 }}{% for table in include_tables %}&tables_include={{ table }}{% endfor %}{% for table in exclude_tables %}&tables_exclude={{ table }}{% endfor %}">Previous</a>
-            {% endif %}
-            <span>Page {{ page_number }}</span>
-            {% if results_missing_states|length == 50 %}
-                <a href="?page={{ page_number + 1 }}{% for table in include_tables %}&tables_include={{ table }}{% endfor %}{% for table in exclude_tables %}&tables_exclude={{ table }}{% endfor %}">Next</a>
-            {% endif %}
-        </div>
-    {% else %}
-        <p>No states found matching the criteria.</p>
-    {% endif %}
-
-    {% if error %}
-        <h3>Error: {{ error }}</h3>
-    {% endif %}
-
-    <!-- JavaScript para manejar el clic en las soluciones -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const solutions = document.querySelectorAll('.solution');
@@ -174,5 +255,6 @@
             });
         });
     </script>
+
 </body>
 </html>
