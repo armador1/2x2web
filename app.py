@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 
 # Ruta a la carpeta de imágenes
-IMAGE_FOLDER = 'static/Images/'
+IMAGE_FOLDER = 'static/images/'
 
 
 def clear_image_folder(folder_path):
