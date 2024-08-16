@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify, url_for
 import sqlite3
 import json
-from ScrImg import st2img
+from ScrImg import st2img, generate_image_name
 import os
 import shutil
 app = Flask(__name__)
@@ -291,7 +291,7 @@ def query_missing_states(include_tables, exclude_tables, page_number=1, page_siz
             for state, solutions_json in results:
                 solutions = json.loads(solutions_json)
                 # Generar la imagen para cada estado
-                image_filename = f"{state}.png"
+                image_filename = generate_image_name(state)
                 image_path = os.path.join(IMAGE_FOLDER, image_filename)
                 st2img(state)  # Genera y guarda la imagen
                 image_url = url_for('static', filename=f'images/{image_filename}')
