@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta de Estados</title>
+    <title>Check States</title>
 
     <!-- CSS para estilizar la página -->
     <style>
@@ -147,7 +147,7 @@
 <body>
 
     <header>
-        <h1>Consulta de Estados Faltantes</h1>
+        <h1>Optimal 2x2x2 Cube</h1>
     </header>
 
     <div class="container">
@@ -180,16 +180,16 @@
                     <label><input type="checkbox" name="tables_exclude" value="CBL"> CBL</label><br>
                 </div>
             </div>
-            <input type="submit" value="Consultar">
+            <input type="submit" value="Submit query">
         </form>
 
         {% if results_missing_states %}
-            <h2>Estados Encontrados</h2>
+            <h2>Found states</h2>
             <table>
                 <thead>
                     <tr>
-                        <th>Imagen</th>
-                        <th>Soluciones</th>
+                        <th>Image</th>
+                        <th>Solutions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -214,15 +214,15 @@
 
             <div class="pagination">
                 {% if page_number > 1 %}
-                    <a href="?page={{ page_number - 1 }}{% for table in include_tables %}&tables_include={{ table }}{% endfor %}{% for table in exclude_tables %}&tables_exclude={{ table }}{% endfor %}">Anterior</a>
+                    <a href="?page={{ page_number - 1 }}{% for table in include_tables %}&tables_include={{ table }}{% endfor %}{% for table in exclude_tables %}&tables_exclude={{ table }}{% endfor %}">Previous</a>
                 {% endif %}
-                <span>Página {{ page_number }}</span>
+                <span>Page {{ page_number }}</span>
                 {% if results_missing_states|length == 50 %}
-                    <a href="?page={{ page_number + 1 }}{% for table in include_tables %}&tables_include={{ table }}{% endfor %}{% for table in exclude_tables %}&tables_exclude={{ table }}{% endfor %}">Siguiente</a>
+                    <a href="?page={{ page_number + 1 }}{% for table in include_tables %}&tables_include={{ table }}{% endfor %}{% for table in exclude_tables %}&tables_exclude={{ table }}{% endfor %}">Next</a>
                 {% endif %}
             </div>
         {% else %}
-            <p>No se encontraron estados que cumplan los requisitos.</p>
+            <p>No found states fulfilling the requirements</p>
         {% endif %}
 
         {% if error %}
