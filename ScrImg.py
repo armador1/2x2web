@@ -5,7 +5,7 @@ import _2x2Main as main
 import ast
 
 
-def st2img(statel):  # (B,G,R)
+def st2img(statel, folder_path):  # (B,G,R)
     if type(statel) == str:
         state = ast.literal_eval(statel)
     else:
@@ -116,7 +116,7 @@ def st2img(statel):  # (B,G,R)
     cv.rectangle(scr, (marg + 3 * lenf + 3 * sep + lenf // 2 + 3, mid + lenf // 2 - 3),
                  (marg + 3 * lenf + 3 * sep + 2 * lenf // 2 - 3, mid + 3), ind2col[st[23]], thickness=-1)
 
-    cv.imwrite('static/Images/' + str(state) + '.png', scr)
+    cv.imwrite(folder_path + str(state) + '.png', scr)
     # cv.imshow('Dibujo2', scr)
     # cv.waitKey(0)
 
