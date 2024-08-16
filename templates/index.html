@@ -3,60 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Query Solutions</title>
+    <title>Check states</title>
+    <style>
+        /* Estilos para la tabla y otros elementos */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        img {
+            max-width: 200px;
+            height: auto;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .solution {
+            cursor: pointer;
+            color: blue;
+            text-decoration: underline;
+        }
+
+        /* Estilos para centrar el formulario */
+        .form-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Altura completa de la ventana */
+        }
+        form {
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }
+
+        /* Estilos para organizar las opciones en columnas */
+        .checkboxes-container {
+            display: flex;
+            gap: 20px; /* Espacio entre las columnas */
+        }
+        .checkbox-column {
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
 </head>
 <body>
-    <h1>Selecciona las tablas para la consulta</h1>
-    <form method="POST">
-        <label>
-            <input type="checkbox" name="tables" value="CLL"> CLL
-        </label><br>
-        <label>
-            <input type="checkbox" name="tables" value="EG1"> EG1
-        </label><br>
-        <label>
-            <input type="checkbox" name="tables" value="EG2"> EG2
-        </label><br>
-        <label>
-            <input type="checkbox" name="tables" value="TCLL"> TCLL
-        </label><br>
-        <label>
-            <input type="checkbox" name="tables" value="TEG1"> TEG1
-        </label><br>
-        <label>
-            <input type="checkbox" name="tables" value="TEG2"> TEG2
-        </label><br>
-        <label>
-            <input type="checkbox" name="tables" value="LS"> LS
-        </label><br>
-        <label>
-            <input type="checkbox" name="tables" value="LSEG1"> LSEG1
-        </label><br>
-        <label>
-            <input type="checkbox" name="tables" value="LSEG2"> LSEG2
-        </label><br>
-        <label>
-            <input type="checkbox" name="tables" value="CBL"> CBL
-        </label><br>
-        <!-- Añade más opciones de tablas según sea necesario -->
+    <h1 style="text-align: center;">Check states</h1>
 
-        <button type="submit">Consultar</button>
-    </form>
+    <!-- Contenedor centrado -->
+    <div class="form-container">
+        <!-- Formulario para mostrar estados faltantes -->
+        <form method="POST">
+            <h2>Find states</h2>
 
-    {% if results %}
-        <h2>Resultados</h2>
-        <table border="1">
-            <tr>
-                <th>State</th>
-                <th>Solutions</th>
-            </tr>
-            {% for row in results %}
-            <tr>
-                <td>{{ row[0] }}</td>
-                <td>{{ row[1] }}</td>
-            </tr>
-            {% endfor %}
+            <!-- Contenedor para organizar las opciones en columnas -->
+            <div class="checkboxes-container">
+                <div class="checkbox-column">
+                    <label>Including:</label><br>
+                    <label><input type="checkbox" name="tables_include" value="CLL"> CLL</label><br>
+                    <label><input type="checkbox" name="tables_include" value="EG1"> EG1</label><br>
+                    <label><input type="checkbox" name="tables_include" value="EG2"> EG2</label><br>
+                    <label><input type="checkbox" name="tables_include" value="TCLL"> TCLL</label><br>
+                    <label><input type="checkbox" name="tables_include" value="TEG1"> TEG1</label><br>
+                    <label><input type="checkbox" name="tables_include" value="TEG2"> TEG2</label><br>
+                    <label><input type="checkbox" name="tables_include" value="LS"> LS</label><br>
+                    <label><input type="checkbox" name="tables_include" value="LSEG1"> LSEG1</label><br>
+                    <label><input type="checkbox" name="tables_include" value="LSEG2"> LSEG2</label><br>
+                    <label><input type="checkbox" name="tables_include" value="CBL"> CBL</label><br>
+                </div>
+
+                <div class="checkbox-column">
+                    <label>Not including:</label><br>
+                    <label><input type="checkbox" name="tables_exclude" value="CLL"> CLL</label><br>
+                    <label><input type="checkbox" name="tables_exclude" value="EG1"> EG1</label><br>
+                    <label><input type="checkbox" name="tables_exclude" value="EG2"> EG2</label><br>
+                    <label><input type="checkbox" name="tables_exclude" value="TCLL"> TCLL</label><br>
+                    <label><input type="checkbox" name="tables_exclude" value="TEG1"> TEG1</label><br>
+                    <label><input type="checkbox" name="tables_exclude" value="TEG2"> TEG2</label><br>
+                    <label><input type="checkbox" name="tables_exclude" value="LS"> LS</label><br>
+                    <label><input type="checkbox" name="tables_exclude" value="LSEG1"> LSEG1</label><br>
+                    <label><input type="checkbox" name="tables_exclude" value="LSEG2"> LSEG2</label><br>
+                    <label><input type="checkbox" name="tables_exclude" value="CBL"> CBL</label><br>
+                </div>
+            </div>
+
+            <br>
+
+            <button type="submit">Check states</button>
+        </form>
+    </div>
+
+    <!-- Resultados de Estados Faltantes -->
+    {% if results_missing_states %}
+        <h2>Found states</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Solutions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for state in results_missing_states %}
+                    <tr>
+                        <td>
+                            {% if state.image_url %}
+                                <img src="{{ state.image_url }}" alt="Imagen de {{ state.state }}">
+                            {% else %}
+                                No image available
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% for solution in state.solutions %}
+                                <div class="solution" data-solution="{{ solution }}">{{ solution }}</div><br>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
         </table>
+    {% else %}
+        <p>Could not find states fulfilling the requirements.</p>
     {% endif %}
+
+    {% if error %}
+        <h3>Error: {{ error }}</h3>
+    {% endif %}
+
+    <!-- JavaScript para manejar el clic en las soluciones -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const solutions = document.querySelectorAll('.solution');
+
+            solutions.forEach(solution => {
+                solution.addEventListener('click', function() {
+                    const solutionText = this.getAttribute('data-solution');
+
+                    fetch(`/rotate_solution?solution=${encodeURIComponent(solutionText)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.result) {
+                                alert(data.result);
+                            } else {
+                                alert('Could not process the solution.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('There was an error processing the solution.');
+                        });
+                });
+            });
+        });
+    </script>
 </body>
 </html>
