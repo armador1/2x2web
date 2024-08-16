@@ -295,7 +295,7 @@ def query_missing_states(include_tables, exclude_tables, page_number=1, page_siz
                 # Generar la imagen para cada estado
                 image_filename = f"{state}.png"
                 image_path = os.path.join(IMAGE_FOLDER, image_filename)
-                st2img(state)  # Genera y guarda la imagen
+                st2img(state, IMAGE_FOLDER)  # Genera y guarda la imagen
                 image_url = url_for('static', filename=f'images/{image_filename}')
                 result_data.append({
                     'state': state,
