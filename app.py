@@ -175,7 +175,10 @@ def state_details(state_id):
             solutions_json, moves = result
             solutions = json.loads(solutions_json)
             image_filename = generate_image_name(state_id)
-            clear_image_folder(SUBIMAGE_FOLDER)
+            if not os.path.exists(SUBIMAGE_FOLDER):
+                os.makedirs(SUBIMAGE_FOLDER)
+            else:
+                clear_image_folder(SUBIMAGE_FOLDER)
             shutil.copy('static/'+f'Images/{image_filename}', 'static/SubImages/')
             image_url = url_for('static', filename=f'SubImages/{image_filename}')
             
@@ -254,27 +257,30 @@ def update_state():
     except sqlite3.Error as e:
         return jsonify({'error': f"Database error: {e}"}), 500
 
-# Función actualizada para manejar la paginación
+
 def query_states(include_tables, exclude_tables, page_number=1, page_size=50):
     def generate_table_aliases(tables):
         return {table: f"t{idx + 1}" for idx, table in enumerate(tables)}
 
     include_aliases = generate_table_aliases(include_tables)
     exclude_aliases = generate_table_aliases(exclude_tables)
+
     sql_query_include = "SELECT DISTINCT s.state FROM solutionsTable s"
-    join_clauses_include = [f"JOIN {table} {alias} ON s.state = {alias}.state" for table, alias in include_aliases.items()]
-    if join_clauses_include:
+    if include_aliases:
+        join_clauses_include = [f"JOIN {table} {alias} ON s.state = {alias}.state" for table, alias in
+                                include_aliases.items()]
         sql_query_include += " " + " ".join(join_clauses_include)
+
     sql_query_exclude = None
     if exclude_aliases:
-        sql_query_exclude = "SELECT DISTINCT s.* FROM solutionsTable s"
+        sql_query_exclude = "SELECT DISTINCT s.state FROM solutionsTable s"
         join_clauses_exclude = [f"LEFT JOIN {table} {alias} ON s.state = {alias}.state" for table, alias in
                                 exclude_aliases.items()]
-        if join_clauses_exclude:
-            sql_query_exclude += " " + " ".join(join_clauses_exclude)
-            # Asegurar que el registro esté en al menos una tabla
-            where_clauses = [f"{alias}.state IS NOT NULL" for alias in exclude_aliases.values()]
-            sql_query_exclude += " WHERE " + " OR ".join(where_clauses)
+        sql_query_exclude += " " + " ".join(join_clauses_exclude)
+        # Asegurar que el registro esté en al menos una tabla
+        where_clauses = [f"{alias}.state IS NOT NULL" for alias in exclude_aliases.values()]
+        sql_query_exclude += " WHERE " + " OR ".join(where_clauses)
+
     conn = sqlite3.connect('oo.db')
     cursor = conn.cursor()
     try:
@@ -285,23 +291,29 @@ def query_states(include_tables, exclude_tables, page_number=1, page_size=50):
             cursor.execute(sql_query_exclude)
             excluded_states = set(row[0] for row in cursor.fetchall())
         missing_states = included_states - excluded_states
+
         if not os.path.exists(IMAGE_FOLDER):
             os.makedirs(IMAGE_FOLDER)
         else:
             clear_image_folder(IMAGE_FOLDER)
+
         if missing_states:
-            missing_states_list = list(missing_states)
-            placeholders = ','.join('?' * len(missing_states_list))
+            # Ordenar y seleccionar los estados de la página actual
+            missing_states_list = sorted(missing_states)
+            start_index = (page_number - 1) * page_size
+            end_index = start_index + page_size
+            page_states = missing_states_list[start_index:end_index]
+
+            placeholders = ','.join('?' * len(page_states))
             sql_details_query = f"""
                 SELECT s.state, s.solutions, s.moves 
                 FROM solutionsTable s
                 WHERE s.state IN ({placeholders})
                 ORDER BY s.moves ASC
-                LIMIT ? OFFSET ?
             """
-            offset = (page_number - 1) * page_size
-            cursor.execute(sql_details_query, missing_states_list + [page_size, offset])
+            cursor.execute(sql_details_query, page_states)
             results = cursor.fetchall()
+
             result_data = []
             for state, solutions_json, moves in results:
                 solutions = json.loads(solutions_json)
