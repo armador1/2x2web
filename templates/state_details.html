@@ -136,6 +136,7 @@
 
     <script>
         let currentStateId = "{{ state }}";  // Guardar el estado actual
+        let currentSolutions = "{{ solutions }}";
 
         function updateState(rotation) {
             $.ajax({
@@ -143,7 +144,8 @@
                 type: "POST",
                 data: {
                     state_id: currentStateId,
-                    rotation: rotation
+                    rotation: rotation,
+                    csol : currentSolutions
                 },
                 success: function(response) {
                     if (response.error) {
@@ -154,6 +156,7 @@
                     $("#state-image").attr("src", response.new_image_url);
                     $("#state-id").text(response.new_state_id);
                     currentStateId = response.new_state_id;  // Actualizar el estado actual
+                    currentSolutions = response.str_solutions;
 
                     // Actualizar la lista de soluciones
                     var solutionsList = $("#solutions-list");
