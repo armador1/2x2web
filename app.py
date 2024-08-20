@@ -161,7 +161,6 @@ def rotateSolution(solution):
 
 
 
-
 @app.route('/state/<state_id>')
 def state_details(state_id):
     conn = sqlite3.connect('oo.db')
@@ -347,10 +346,14 @@ def index():
     results_missing_states = None
     error = None
 
-    try:
-        results_missing_states = query_states(include_tables, exclude_tables, page_number)
-    except Exception as e:
-        error = str(e)
+    if include_tables:
+        try:
+            results_missing_states = query_missing_states(include_tables, exclude_tables, page_number)
+        except Exception as e:
+            error = str(e)
+    else:
+        if request.method == 'POST':
+            error = "Debe seleccionar al menos una tabla para incluir."
 
     return render_template('index.html',
                            results_missing_states=results_missing_states,
