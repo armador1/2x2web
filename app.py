@@ -197,24 +197,30 @@ def state_details(state_id):
 def update_state():
     state_id = request.form.get('state_id')
     rotation = request.form.get('rotation')
+    csol = request.form.get('csol')
+    # print(csol)
+    csol2 = csol.replace('&#34;', '"')
+    new_csol = csol2.replace('&#39;', "'")
+    #print(new_csol)
+    solutions = ast.literal_eval(new_csol)
 
     if not state_id or not rotation:
         return jsonify({'error': 'Missing state_id or rotation'}), 400
 
     try:
         # Generar nueva solución rotada
-        conn = sqlite3.connect('oo.db')
-        cursor = conn.cursor()
-        cursor.execute("SELECT solutions FROM solutionsTable WHERE state = ?", (state_id,))
-        result = cursor.fetchone()
-        if result:
-            solutions_json = result[0]
-            solutions = json.loads(solutions_json)
-        if not result:
-            return jsonify({'error': 'State not found'}), 404
+        # conn = sqlite3.connect('oo.db')
+        # cursor = conn.cursor()
+        # cursor.execute("SELECT solutions FROM solutionsTable WHERE state = ?", (state_id,))
+        # result = cursor.fetchone()
+        # if result:
+        #     solutions_json = result[0]
+        #     solutions = json.loads(solutions_json)
+        # if not result:
+        #     return jsonify({'error': 'State not found'}), 404
 
-        solutions_json = result[0]
-        solutions = json.loads(solutions_json)
+        # solutions_json = result[0]
+        # solutions = json.loads(solutions_json)
 
         # Aquí se debe rotar las soluciones y generar una nueva imagen
         # La función rotateSolution() ya rota las soluciones.
@@ -234,6 +240,7 @@ def update_state():
         # print(state_id)
         new_state_id = str(_2x2Main.s2sList(rot(_2x2Main.sList2s(ast.literal_eval(state_id)))))
         # print(new_state_id)
+        clear_image_folder(SUBIMAGE_FOLDER)
         image_filename = generate_image_name(new_state_id)
         sub_st2img(new_state_id)
 
@@ -241,58 +248,47 @@ def update_state():
 
         return jsonify({'new_image_url': new_image_url,
                         'new_state_id' : new_state_id,
-                        'solutions' : rotated_solutions})
+                        'solutions' : rotated_solutions,
+                        'str_solutions' : str(rotated_solutions)})
 
     except sqlite3.Error as e:
         return jsonify({'error': f"Database error: {e}"}), 500
 
-    finally:
-        conn.close()
-
 # Función actualizada para manejar la paginación
-def query_missing_states(include_tables, exclude_tables, page_number=1, page_size=50):
+def query_states(include_tables, exclude_tables, page_number=1, page_size=50):
     def generate_table_aliases(tables):
         return {table: f"t{idx + 1}" for idx, table in enumerate(tables)}
 
     include_aliases = generate_table_aliases(include_tables)
     exclude_aliases = generate_table_aliases(exclude_tables)
-
     sql_query_include = "SELECT DISTINCT s.state FROM solutionsTable s"
     join_clauses_include = [f"JOIN {table} {alias} ON s.state = {alias}.state" for table, alias in include_aliases.items()]
     if join_clauses_include:
         sql_query_include += " " + " ".join(join_clauses_include)
-
     sql_query_exclude = None
     if exclude_aliases:
         sql_query_exclude = "SELECT DISTINCT s.* FROM solutionsTable s"
         join_clauses_exclude = [f"LEFT JOIN {table} {alias} ON s.state = {alias}.state" for table, alias in
                                 exclude_aliases.items()]
-
         if join_clauses_exclude:
             sql_query_exclude += " " + " ".join(join_clauses_exclude)
             # Asegurar que el registro esté en al menos una tabla
             where_clauses = [f"{alias}.state IS NOT NULL" for alias in exclude_aliases.values()]
             sql_query_exclude += " WHERE " + " OR ".join(where_clauses)
-
     conn = sqlite3.connect('oo.db')
     cursor = conn.cursor()
-
     try:
         cursor.execute(sql_query_include)
         included_states = set(row[0] for row in cursor.fetchall())
-
         excluded_states = set()
         if sql_query_exclude:
             cursor.execute(sql_query_exclude)
             excluded_states = set(row[0] for row in cursor.fetchall())
-
         missing_states = included_states - excluded_states
-
         if not os.path.exists(IMAGE_FOLDER):
             os.makedirs(IMAGE_FOLDER)
         else:
             clear_image_folder(IMAGE_FOLDER)
-
         if missing_states:
             missing_states_list = list(missing_states)
             placeholders = ','.join('?' * len(missing_states_list))
@@ -303,11 +299,9 @@ def query_missing_states(include_tables, exclude_tables, page_number=1, page_siz
                 ORDER BY s.moves ASC
                 LIMIT ? OFFSET ?
             """
-
             offset = (page_number - 1) * page_size
             cursor.execute(sql_details_query, missing_states_list + [page_size, offset])
             results = cursor.fetchall()
-
             result_data = []
             for state, solutions_json, moves in results:
                 solutions = json.loads(solutions_json)
@@ -321,9 +315,7 @@ def query_missing_states(include_tables, exclude_tables, page_number=1, page_siz
                     'image_url': image_url,
                     'moves': moves
                 })
-
             return result_data
-
         return []
     except sqlite3.Error as e:
         print(f"Error al ejecutar la consulta: {e}")
@@ -342,18 +334,13 @@ def index():
         page_number = int(request.args.get('page', 1))
         include_tables = request.args.getlist('tables_include')
         exclude_tables = request.args.getlist('tables_exclude')
-
     results_missing_states = None
     error = None
 
-    if include_tables:
-        try:
-            results_missing_states = query_missing_states(include_tables, exclude_tables, page_number)
-        except Exception as e:
+    try:
+        results_missing_states = query_states(include_tables, exclude_tables, page_number)
+    except Exception as e:
             error = str(e)
-    else:
-        if request.method == 'POST':
-            error = "Debe seleccionar al menos una tabla para incluir."
 
     return render_template('index.html',
                            results_missing_states=results_missing_states,
