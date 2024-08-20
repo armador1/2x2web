@@ -41,3 +41,122 @@ def Sol2Scr(sol):
             scr[k] = i
         k = k + 1
     return scr
+
+def U(st):
+    # Applies an U move to a given state
+    s = copy.deepcopy(st)
+    aux = s[0]
+    for i in range(0,3):
+        s[i] = s[i+1]
+    s[3] = aux
+    return(s)
+def U2(st):
+    # Applies an U2 move to a given state 
+    s = copy.deepcopy(st)
+    return(U(U(s)))
+def U3(st):
+    # Applies an U' move to a given state
+    s = copy.deepcopy(st)
+    return(U(U2(s)))
+
+def F(st):
+    # Applies a F move to a given state
+    s = copy.deepcopy(st)
+    aux = s[0][1]
+    s[0][1] = s[4][2]
+    s[4][2] = s[5][1]
+    s[5][1] = s[1][2]
+    s[1][2] = aux
+
+    aux = s[0][0]
+    s[0][0] = s[4][1]
+    s[4][1] = s[5][0]
+    s[5][0] = s[1][1]
+    s[1][1] = aux
+
+    aux = s[0][2]
+    s[0][2] = s[4][0]
+    s[4][0] = s[5][2]
+    s[5][2] = s[1][0]
+    s[1][0] = aux
+    return(s)
+def F2(st):
+    # Applies a F2 move to a given state
+    s = copy.deepcopy(st)
+    return(F(F(s)))
+def F3(st):
+    # Applies a F' move to a given state
+    s = copy.deepcopy(st)
+    return(F(F2(s)))
+
+# Rotations
+
+def x(st):
+    # Applies a x rotation to a given state
+    s = copy.deepcopy(st)
+    aux = s[0][0]
+    s[0][0] = s[4][2]
+    s[4][2] = s[7][0]
+    s[7][0] = s[3][2]
+    s[3][2] = aux
+    aux = s[0][1]
+    s[0][1] = s[4][0]
+    s[4][0] = s[7][1]
+    s[7][1] = s[3][0]
+    s[3][0] = aux
+    aux = s[0][2]
+    s[0][2] = s[4][1]
+    s[4][1] = s[7][2]
+    s[7][2] = s[3][1]
+    s[3][1] = aux
+    aux = s[1][0]
+    s[1][0] = s[5][1]
+    s[5][1] = s[6][0]
+    s[6][0] = s[2][1]
+    s[2][1] = aux
+    aux = s[1][2]
+    s[1][2] = s[5][0]
+    s[5][0] = s[6][2]
+    s[6][2] = s[2][0]
+    s[2][0] = aux
+    aux = s[1][1]
+    s[1][1] = s[5][2]
+    s[5][2] = s[6][1]
+    s[6][1] = s[2][2]
+    s[2][2] = aux
+    return s
+
+def x2(st):
+    # Applies a x2 rotation to a given state
+    s = copy.deepcopy(st)
+    return(x(x(s)))
+def x3(st):
+    # Applies a x' rotation to a given state
+    s = copy.deepcopy(st)
+    return(x(x2(s)))
+
+def y(st):
+    # Applies a y rotation to a given state
+    s = copy.deepcopy(st)
+    return(x2(U3(x2(U(s)))))
+def y2(st):
+    # Applies a y2 rotation to a given state
+    s = copy.deepcopy(st)
+    return(y(y(s)))
+def y3(st):
+    # Applies a y' rotation to a given state
+    s = copy.deepcopy(st)
+    return(y(y2(s)))
+
+def z(st):
+    # Applies a z rotation to a given state
+    s = copy.deepcopy(st)
+    return(x2(F3(x2(F(s)))))
+def z2(st):
+    # Applies a z2 rotation to a given state
+    s = copy.deepcopy(st)
+    return(z(z(s)))
+def z3(st):
+    # Applies a z' rotation to a given state
+    s = copy.deepcopy(st)
+    return(z(z2(s)))

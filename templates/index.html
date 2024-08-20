@@ -197,8 +197,11 @@
                     {% for state in results_missing_states %}
                         <tr>
                             <td>
+                                
                                 {% if state.image_url %}
-                                    <img src="{{ state.image_url }}" alt="Imagen de {{ state.state }}">
+                                    <a href="{{ url_for('state_details', state_id=state.state) }}">
+                                        <img src="{{ state.image_url }}" alt="Estado {{ state.state }}" />
+                                    </a>
                                 {% else %}
                                     No image available
                                 {% endif %}

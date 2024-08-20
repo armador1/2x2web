@@ -1,9 +1,12 @@
 from flask import Flask, render_template, request, jsonify, url_for
 import sqlite3
 import json
-from ScrImg import st2img, generate_image_name
+from ScrImg import st2img, generate_image_name, sub_st2img
 import os
 import re
+import shutil
+import _2x2Main
+import ast
 
 
 app = Flask(__name__)
@@ -11,6 +14,7 @@ app = Flask(__name__)
 
 # Ruta a la carpeta de imágenes
 IMAGE_FOLDER = 'static/Images/'
+SUBIMAGE_FOLDER = 'static/SubImages/'
 
 
 def clear_image_folder(folder_path):
@@ -237,6 +241,93 @@ def rotateSolution(solution):
 #     finally:
 #         conn.close()
 
+@app.route('/state/<state_id>')
+def state_details(state_id):
+    conn = sqlite3.connect('oo.db')
+    cursor = conn.cursor()
+
+    try:
+        # Query para obtener la información del estado específico
+        cursor.execute("SELECT solutions, moves FROM solutionsTable WHERE state = ?", (state_id,))
+        result = cursor.fetchone()
+
+        if result:
+            solutions_json, moves = result
+            solutions = json.loads(solutions_json)
+            image_filename = generate_image_name(state_id)
+            clear_image_folder(SUBIMAGE_FOLDER)
+            shutil.copy('static/'+f'Images/{image_filename}', 'static/SubImages/')
+            image_url = url_for('static', filename=f'SubImages/{image_filename}')
+            
+            return render_template('state_details.html',
+                                   state=state_id,
+                                   solutions=solutions,
+                                   image_url=image_url,
+                                   moves=moves)
+        else:
+            return f"Estado {state_id} no encontrado.", 404
+
+    except sqlite3.Error as e:
+        return f"Error al acceder a la base de datos: {e}", 500
+
+    finally:
+        conn.close()
+
+@app.route('/update_state', methods=['POST'])
+def update_state():
+    state_id = request.form.get('state_id')
+    rotation = request.form.get('rotation')
+
+    if not state_id or not rotation:
+        return jsonify({'error': 'Missing state_id or rotation'}), 400
+
+    try:
+        # Generar nueva solución rotada
+        conn = sqlite3.connect('oo.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT solutions FROM solutionsTable WHERE state = ?", (state_id,))
+        result = cursor.fetchone()
+        if result:
+            solutions_json = result[0]
+            solutions = json.loads(solutions_json)
+        if not result:
+            return jsonify({'error': 'State not found'}), 404
+
+        solutions_json = result[0]
+        solutions = json.loads(solutions_json)
+
+        # Aquí se debe rotar las soluciones y generar una nueva imagen
+        # La función rotateSolution() ya rota las soluciones.
+        rotated_solutions = []
+        if rotation == 'x3':
+            rot2 = "x'"
+        elif rotation == 'y3':
+            rot2 = "y'"
+        elif rotation == 'z3':
+            rot2 = "z'"
+        else:
+            rot2 = rotation
+        for sol in solutions:
+            rotated_solutions.append(new_orientation(sol,rot2))  # Suponiendo que la solución a rotar es la primera
+
+        rot = getattr(_2x2Main, rotation)
+        # print(state_id)
+        new_state_id = str(_2x2Main.s2sList(rot(_2x2Main.sList2s(ast.literal_eval(state_id)))))
+        # print(new_state_id)
+        image_filename = generate_image_name(new_state_id)
+        sub_st2img(new_state_id)
+
+        new_image_url = url_for('static', filename=f'SubImages/{image_filename}')
+
+        return jsonify({'new_image_url': new_image_url,
+                        'new_state_id' : new_state_id,
+                        'solutions' : rotated_solutions})
+
+    except sqlite3.Error as e:
+        return jsonify({'error': f"Database error: {e}"}), 500
+
+    finally:
+        conn.close()
 
 # Función actualizada para manejar la paginación
 def query_missing_states(include_tables, exclude_tables, page_number=1, page_size=50):
