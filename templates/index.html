@@ -1,149 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='icon.ico') }}">
     <title>Check States</title>
-
-    <!-- CSS para estilizar la página -->
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            background-color: #007bff;
-            color: white;
-            padding: 15px 20px;
-            text-align: center;
-        }
-
-        h1 {
-            margin: 0;
-            font-size: 24px;
-        }
-
-        h2 {
-            color: #007bff;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        form {
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .form-group > div {
-            flex: 1;
-        }
-
-        label {
-            display: block;
-            margin: 10px 0 5px;
-            font-weight: bold;
-        }
-
-        select, input[type="submit"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-
-        input[type="submit"] {
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-            border: none;
-            transition: background-color 0.3s;
-        }
-
-        input[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: center;
-        }
-
-        th {
-            background-color: #007bff;
-            color: white;
-        }
-
-        td img {
-            max-width: 300px; /* Ajusta este valor según tus necesidades */
-            height: auto; /* Mantiene la proporción de la imagen */
-        }
-
-        .pagination {
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        .pagination a {
-            display: inline-block;
-            padding: 10px 15px;
-            margin: 0 5px;
-            border: 1px solid #007bff;
-            border-radius: 4px;
-            color: #007bff;
-            text-decoration: none;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .pagination a:hover {
-            background-color: #007bff;
-            color: white;
-        }
-
-        .error {
-            color: red;
-            margin-top: 20px;
-            font-weight: bold;
-        }
-
-        .solution {
-            color: #007bff;
-            text-decoration: underline;
-            cursor: pointer;
-        }
-
-        .solution:hover {
-            color: #0056b3;
-        }
-    </style>
 </head>
+
 <body>
 
     <header>
@@ -151,7 +16,7 @@
     </header>
 
     <div class="container">
-        <form method="post" action="/">
+        <form action="/search" method="POST">
             <div class="form-group">
                 <div>
                     <h3>Including:</h3>
@@ -182,90 +47,11 @@
             </div>
             <input type="submit" value="Submit query">
         </form>
-
-        {% if results_missing_states %}
-            <h2>Found states</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Image</th>
-                        <th>Moves</th>
-                        <th>Solutions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for state in results_missing_states %}
-                        <tr>
-                            <td>
-                                
-                                {% if state.image_url %}
-                                    <a href="{{ url_for('state_details', state_id=state.state) }}" target="_blank">
-                                        <img src="{{ state.image_url }}" alt="Estado {{ state.state }}" />
-                                    </a>
-                                {% else %}
-                                    No image available
-                                {% endif %}
-                            </td>
-                            <td>{{ state.moves }}</td>
-                            <td>
-                                {% for solution in state.solutions %}
-                                    <div class="solution" data-solution="{{ solution }}">{{ solution }}</div><br>
-                                {% endfor %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-
-            <div class="pagination">
-                {% if page_number > 1 %}
-                    <a href="?page={{ page_number - 1 }}{% for table in include_tables %}&tables_include={{ table }}{% endfor %}{% for table in exclude_tables %}&tables_exclude={{ table }}{% endfor %}">Previous</a>
-                {% endif %}
-                <span>Page {{ page_number }}</span>
-                {% if results_missing_states|length == 50 %}
-                    <a href="?page={{ page_number + 1 }}{% for table in include_tables %}&tables_include={{ table }}{% endfor %}{% for table in exclude_tables %}&tables_exclude={{ table }}{% endfor %}">Next</a>
-                {% endif %}
-            </div>
-        {% else %}
-            <p>No found states fulfilling the requirements</p>
-        {% endif %}
-
-        {% if error %}
-            <div class="error">{{ error }}</div>
-        {% endif %}
     </div>
 
     <footer style="background-color: #f4f4f9; text-align: center; padding: 10px; margin-top: 20px; color: #666;">
         <p>Developed by <a href="https://www.worldcubeassociation.org/persons/2015SALO01" target="_blank">Álvaro Aguilar Salobreña</a> and <a href="https://www.worldcubeassociation.org/persons/2016GALA04" target="_blank">Andrés Rodríguez Galán</a></p>
     </footer>
-
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const solutions = document.querySelectorAll('.solution');
-
-            solutions.forEach(solution => {
-                solution.addEventListener('click', function() {
-                    const solutionText = this.getAttribute('data-solution');
-
-                    fetch(`/rotate_solution?solution=${encodeURIComponent(solutionText)}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.result) {
-                                alert(data.result);
-                            } else {
-                                alert('Could not process the solution.');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('There was an error processing the solution.');
-                        });
-                });
-            });
-        });
-    </script>
 
 </body>
 </html>

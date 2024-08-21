@@ -160,7 +160,6 @@ def rotateSolution(solution):
     return rotated_solutions_str
 
 
-
 @app.route('/state/<state_id>')
 def state_details(state_id):
     conn = sqlite3.connect('oo.db')
@@ -195,6 +194,7 @@ def state_details(state_id):
 
     finally:
         conn.close()
+
 
 @app.route('/update_state', methods=['POST'])
 def update_state():
@@ -258,6 +258,9 @@ def update_state():
         return jsonify({'error': f"Database error: {e}"}), 500
 
 
+# EL ORDEN CON LOS MOVES NO FUNCIONA BIEN DEBIDO A LA PAGINACIÓN
+# LA PAGINACIÓN HACE QUE LA WEB CREA QUE SOLO HAY 50 ESTADOS. CADA VEZ QUE SE PASA DE PÁGINA, SE HACE UNA QUERY NUEVA
+# PERO IGNORANDO LOS 50 REGISTROS ANTERIORES.
 def query_states(include_tables, exclude_tables, page_number=1, page_size=50):
     def generate_table_aliases(tables):
         return {table: f"t{idx + 1}" for idx, table in enumerate(tables)}
@@ -336,8 +339,13 @@ def query_states(include_tables, exclude_tables, page_number=1, page_size=50):
         conn.close()
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def index():
+    return render_template('index.html')
+
+
+@app.route('/search', methods=['GET', 'POST'])
+def search():
     if request.method == 'POST':
         page_number = 1  # Resetear a la primera página en una nueva consulta
         include_tables = request.form.getlist('tables_include')
@@ -352,9 +360,9 @@ def index():
     try:
         results_missing_states = query_states(include_tables, exclude_tables, page_number)
     except Exception as e:
-            error = str(e)
+        error = str(e)
 
-    return render_template('index.html',
+    return render_template('search.html',
                            results_missing_states=results_missing_states,
                            error=error,
                            page_number=page_number,
@@ -370,4 +378,4 @@ def rotate_solution():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
