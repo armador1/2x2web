@@ -160,6 +160,10 @@ def rotateSolution(solution):
 
     return rotated_solutions_str
 
+@app.route('/info')
+def info():
+    return render_template('info.html')
+
 
 @app.route('/state/<state_id>')
 def state_details(state_id):

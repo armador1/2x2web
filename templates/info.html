@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='icon.ico') }}">
+    <title>About this page</title>
+</head>
+
+<body>
+
+    <header>
+        <h1>About this page</h1>
+    </header>
+
+    <main class="container">
+        <div class="image-container">
+            <img src="static/Tarasca.jpeg" width="400">
+        </div>
+    <p>
+        In this webpage you can search information about <b>any</b> 2x2 state. In order to reduce the number of states, we take "equivalent"
+        states as only one.
+    </p>
+    <p>
+        Two states are said to be equivalents if they both can be solved with the same moves from some orientation. Most 
+        states have 23 equivalent corresponding to the 23 possible orientation, but there are also states with less. This notion of equivalence
+        allowed us to reduce the number of states from 3674160 to 154608 unique states. 
+    </p>
+    <p>
+        These states were then classified into the main advanced methods for 2x2 speedsolving. For the states that are not a case of any 
+        method, we <b>[REDACTED]</b>.
+    </p>
+    <p>
+        The database queries are based on two inputs: which methods you want to include in your results and what methods you want to tables_exclude
+        
+    </p>
+    <a href="{{ url_for('index') }}" class="back-link">Return to main page</a>
+    </main>
+    
+    <footer style="background-color: #f4f4f9; text-align: center; padding: 10px; margin-top: 20px; color: #666;">
+        <p>Developed by <a href="https://www.worldcubeassociation.org/persons/2015SALO01" target="_blank">Álvaro Aguilar Salobreña</a> and <a href="https://www.worldcubeassociation.org/persons/2016GALA04" target="_blank">Andrés Rodríguez Galán</a></p>
+    </footer>
+
+</body>
+</html>
