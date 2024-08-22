@@ -6,19 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="shortcut icon" href="{{ url_for('static', filename='icon.ico') }}">
-    <title>Detalles del Estado</title>
+    <title>State Details</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <body>
     <header>
-        <h1>Detalles del Estado: <span id="state-id">{{ state }}</span></h1>
+        <h1>States <span id="state-id">{{ state }}</span> details</h1>
     </header>
 
     <main class="container">
         <div class="image-container">
             <img id="state-image" src="{{ image_url }}" alt="Imagen del Estado" class="state-image">
         </div>
+
 
         <div class="buttons">
             <button class="btn" onclick="updateState('x')">x</button>
@@ -29,12 +30,16 @@
             <button class="btn" onclick="updateState('z3')">z'</button>
         </div>
 
+        <div class="scramble">
+            <h2>Scramble: <span id="scramble-text">{{ scramble }}</span></h2>
+        </div>
+        
         <div class="details">
-            <p><strong>Movimientos:</strong> {{ moves }}</p>
+            <p><strong>Moves:</strong> {{ moves }}</p>
         </div>
 
         <div class="solutions">
-            <h2>Soluciones</h2>
+            <h2>Optimal solutions</h2>
             <ul id="solutions-list">
                 {% for solution in solutions %}
                     <li>{{ solution }}</li>
@@ -42,7 +47,7 @@
             </ul>
         </div>
 
-        <a href="{{ url_for('index') }}" class="back-link">Volver a la página principal</a>
+        <a href="{{ url_for('index') }}" class="back-link">Return to main page</a>
 
     </main>
 
@@ -76,12 +81,35 @@
                     response.solutions.forEach(function(solution) {
                         solutionsList.append("<li>" + solution + "</li>");
                     });
+
+                    getScramble(currentSolutions);
                 },
                 error: function() {
                     alert("Error al actualizar el estado.");
                 }
             });
         }
+
+        function getScramble(solutions) {
+            $.ajax({
+                url: "{{ url_for('get_scramble') }}",  // Ruta que define la mezcla
+                type: "POST",
+                data: {
+                    solution: solutions
+                },
+                success: function(response) {
+                    // Actualizar el cuadro de texto con la mezcla generada
+                    $("#scramble-text").text(response.scramble);
+                },
+                error: function() {
+                    alert("Error al generar la mezcla.");
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            getScramble("{{ solutions }}");
+        });
     </script>
 </body>
 </html>

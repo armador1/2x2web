@@ -7,6 +7,7 @@ import re
 import shutil
 import _2x2Main
 import ast
+import random as rd
 
 
 app = Flask(__name__)
@@ -194,7 +195,31 @@ def state_details(state_id):
 
     finally:
         conn.close()
-
+@app.route('/get_scramble', methods=['POST'])
+def get_scramble():
+    csol = request.form.get('solution')
+    # print(csol)
+    csol2 = csol.replace('&#34;', '"')
+    new_csol = csol2.replace('&#39;', "'")
+    #print(new_csol)
+    solutions = ast.literal_eval(new_csol)
+    print(solutions)
+    scrb_sol = solutions[rd.randint(0,len(solutions)-1)]
+    scrb1 = scrb_sol.split(' ')
+    scrb1.reverse()
+    scrb = ""
+    for i in scrb1:
+        if "'" in i:
+            appn = i.replace("'",'')
+        elif '2' in i:
+            appn = i
+        else:
+            appn = i+"'"
+        scrb = scrb + appn + " "
+    
+    scramble = scrb[:-1]
+    print(scramble)
+    return jsonify({'scramble' : scramble})
 
 @app.route('/update_state', methods=['POST'])
 def update_state():
@@ -237,8 +262,9 @@ def update_state():
         else:
             rot2 = rotation
         for sol in solutions:
-            rotated_solutions.append(new_orientation(sol,rot2))  # Suponiendo que la solución a rotar es la primera
+            rotated_solutions.append(new_orientation(sol,rot2))
 
+        
         rot = getattr(_2x2Main, rotation)
         # print(state_id)
         new_state_id = str(_2x2Main.s2sList(rot(_2x2Main.sList2s(ast.literal_eval(state_id)))))
