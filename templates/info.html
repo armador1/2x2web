@@ -20,7 +20,7 @@
         }
 
         img {
-            width: 350px; /* Asegura que la imagen ocupe todo el ancho del contenedor */
+            /* width: 350px; /* Asegura que la imagen ocupe todo el ancho del contenedor */
             height: auto; /* Mantiene la proporción de la imagen */
         }
 
@@ -42,35 +42,60 @@
         <div class="image-container">
             <img src="static/Tarasca.jpeg" width="400">
         </div>
+    <h3>What is this page?</h3>
     <p>
         In this webpage you can search information about <b>any</b> 2x2 state. In order to reduce the number of states, we take "equivalent"
         states as only one.
     </p>
+    <h3>What are equivalent states?</h3>
     <p>
         Two states are said to be equivalents if they both can be solved with the same moves from some orientation. Most 
         states have 23 equivalent corresponding to the 23 possible orientation, but there are also states with less. This notion of equivalence
         allowed us to reduce the number of states from 3674160 to 154608 unique states. 
     </p>
+    <h3>How are the states classified?</h3>
     <p>
         These states were then classified into the main advanced methods for 2x2 speedsolving. For the states that are not a case of any 
-        method, we <b>[REDACTED]</b>.
+        method, we counted the number of bars and diagonals in faces for each states. The exact procedure will be explained later in this page.
+        <b>[Yet to be implemented]</b>
     </p>
+    <h3>How does the search work?</h3>
     <p>
         The database queries are based on two inputs: which methods you want to include in your results and what methods you want to exclude.
         Choosing two or more methods simultaneously will give states that are cases of all of them. For example, including CLL and EG2 will 
         result in states that have a CLL layer in one face and a EG2 layer in another one. On the other hand, exclusion works a bit differently, 
-        so excluding CLL and EG2 will result in states that are not CLL nor EG2. 
+        so excluding CLL and EG2 will result in states that are not CLL nor EG2.
     </p>
-    <div class="contenedor2">
     <p>
-        Also, about the CBL option, states that are EG are not included 
-        in the CBL list unless they have a CBL case in a different axis from the EG layer. For example, the state with scramble 
-        R' U2 R F2 U' R' U F2 U' F has a CLL in the U layer and also a CBL in the R layer, so it counts both as a CLL and a CBL. 
+        After searching for states you can click on the image of any state, which will open a new page with more info about the state. 
+        In this page you can find a scramble along with all the optimal solutions for the state. Also, you can click in the buttons under 
+        the image to rotate it along with the scramble and the solutions so you can find the best solution. 
     </p>
+    <p>
+        It is imortant to note 
+        that the colors on the image will not match those of your scrambled cube, but they will always be equivalent states.
+    </p>
+    <h3>What states are considered CBLs?</h3>
+    <div class="contenedor2">
+    <div>
+        
+        <p>
+        About the CBL option, states that are EG are not included 
+        in the CBL list unless they have a CBL case in a different axis from the EG layer. For example, the state with scramble 
+        R' U2 R F2 U' R' U F2 U' F has a CLL in the U axis, but also a CBL in the R axis; so it counts both as a CLL and a CBL. 
+    </p>
+    </div>
     <figure>
-        <img src='static/CBLExample.png' width="400"/>
-        <figcaption><i><font size="+0.5">Scramble: R' U2 R F2 U' R' U F2 U' F</font></i></figcaption>
+        <img src='static/CBLExample.png' width="200"/>
+        <figcaption><i><b><font size="+0.5">Scramble: R' U2 R F2 U' R' U F2 U' F</font></b></i></figcaption>
     </figure>
+
+    
+
+
+
+
+
     </div>
     
     <a href="{{ url_for('index') }}" class="back-link">Return to main page</a>
