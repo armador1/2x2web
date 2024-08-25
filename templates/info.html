@@ -7,6 +7,29 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="shortcut icon" href="{{ url_for('static', filename='icon.ico') }}">
     <title>About this page</title>
+    <style>
+        .contenedor2 {
+            display: flex;
+            align-items: center; /* Centra verticalmente el párrafo y la imagen */
+            gap: 15px; /* Espacio entre la imagen y el párrafo */
+        }
+
+        figure {
+            margin: 0; /* Elimina márgenes predeterminados */
+            max-width: 2000px; /* Limita el ancho de la figura */
+        }
+
+        img {
+            width: 350px; /* Asegura que la imagen ocupe todo el ancho del contenedor */
+            height: auto; /* Mantiene la proporción de la imagen */
+        }
+
+        figcaption {
+            font-size: 0.9em; /* Tamaño del pie de foto */
+            text-align: center; /* Centrar el texto del pie de foto */
+            margin-top: 5px; /* Espacio entre la imagen y el pie de foto */
+        }
+        </style>
 </head>
 
 <body>
@@ -34,9 +57,22 @@
     </p>
     <p>
         The database queries are based on two inputs: which methods you want to include in your results and what methods you want to exclude.
-        Choosing two or more methods simultaneously will give states that are cases of all of them.
-
+        Choosing two or more methods simultaneously will give states that are cases of all of them. For example, including CLL and EG2 will 
+        result in states that have a CLL layer in one face and a EG2 layer in another one. On the other hand, exclusion works a bit differently, 
+        so excluding CLL and EG2 will result in states that are not CLL nor EG2. 
     </p>
+    <div class="contenedor2">
+    <p>
+        Also, about the CBL option, states that are EG are not included 
+        in the CBL list unless they have a CBL case in a different axis from the EG layer. For example, the state with scramble 
+        R' U2 R F2 U' R' U F2 U' F has a CLL in the U layer and also a CBL in the R layer, so it counts both as a CLL and a CBL. 
+    </p>
+    <figure>
+        <img src='static/CBLExample.png' width="400"/>
+        <figcaption><i><font size="+0.5">Scramble: R' U2 R F2 U' R' U F2 U' F</font></i></figcaption>
+    </figure>
+    </div>
+    
     <a href="{{ url_for('index') }}" class="back-link">Return to main page</a>
     </main>
     

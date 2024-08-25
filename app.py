@@ -207,7 +207,7 @@ def get_scramble():
     new_csol = csol2.replace('&#39;', "'")
     #print(new_csol)
     solutions = ast.literal_eval(new_csol)
-    print(solutions)
+    # print(solutions)
     scrb_sol = solutions[rd.randint(0,len(solutions)-1)]
     scrb1 = scrb_sol.split(' ')
     scrb1.reverse()
@@ -222,7 +222,7 @@ def get_scramble():
         scrb = scrb + appn + " "
     
     scramble = scrb[:-1]
-    print(scramble)
+    # print(scramble)
     return jsonify({'scramble' : scramble})
 
 @app.route('/update_state', methods=['POST'])
