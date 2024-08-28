@@ -30,6 +30,52 @@
                     <label><input type="checkbox" name="tables_include" value="LSEG1"> LSEG1</label><br>
                     <label><input type="checkbox" name="tables_include" value="LSEG2"> LSEG2</label><br>
                     <label><input type="checkbox" name="tables_include" value="CBL"> CBL</label><br>
+                    <label>Full bars:
+                        <select id="Bar" onchange="updateHiddenInput('Bar')">
+                            <option value="">No selection</option>
+                            {% for i in range(0, 9) %}
+                                <option value="{{i}}">{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </label><br>
+                    <label>Adjacent bars:
+                        <select id="ABar" onchange="updateHiddenInput('ABar')">
+                            <option value="">No selection</option>
+                            {% for i in range(0, 7) %}
+                                <option value="{{i}}">{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </label><br>
+                    <label>Opposite bars:
+                        <select id="OBar" onchange="updateHiddenInput('OBar')">
+                            <option value="">No selection</option>
+                            {% for i in range(0, 9) %}
+                                <option value="{{i}}">{{ i }}</option>
+                            {% endfor %}
+                            <option value="12">12</option>
+                        </select>
+                    </label><br>
+                    <label>Diags:
+                        <select id="Diag" onchange="updateHiddenInput('Diag')">
+                            <option value="">No selection</option>
+                            {% for i in range(0, 9) %}
+                                <option value="{{i}}">{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </label><br>
+                    <label>Adjacent diags:
+                        <select id="ADiag" onchange="updateHiddenInput('ADiag')">
+                            <option value="">No selection</option>
+                            {% for i in range(0, 7) %}
+                                <option value="{{i}}">{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </label><br>
+                    <input type="hidden" id="BarTable" name="tables_include">
+                    <input type="hidden" id="ABarTable" name="tables_include">
+                    <input type="hidden" id="OBarTable" name="tables_include">
+                    <input type="hidden" id="DiagTable" name="tables_include">
+                    <input type="hidden" id="ADiagTable" name="tables_include">
                 </div>
                 <div>
                     <h3>Excluding:</h3>
@@ -53,6 +99,23 @@
     <footer style="background-color: #f4f4f9; text-align: center; padding: 10px; margin-top: 20px; color: #666;">
         <p>Developed by <a href="https://www.worldcubeassociation.org/persons/2015SALO01" target="_blank">Álvaro Aguilar Salobreña</a> and <a href="https://www.worldcubeassociation.org/persons/2016GALA04" target="_blank">Andrés Rodríguez Galán</a></p>
     </footer>
+
+    <!-- JavaScript para actualizar el valor del campo oculto -->
+    <script>
+        function updateHiddenInput(table) {
+
+            const Value = document.getElementById(table).value;
+            const Table = document.getElementById(table + 'Table');
+
+            if (document.getElementById(table).value !== "")
+                Table.value = table + '_' + Value;
+            else
+                Table.value = "";
+
+            console.log(Table.value);
+
+        }
+    </script>
 
 </body>
 </html>
