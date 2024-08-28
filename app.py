@@ -9,9 +9,7 @@ import _2x2Main
 import ast
 import random as rd
 
-
 app = Flask(__name__)
-
 
 # Ruta a la carpeta de imágenes
 IMAGE_FOLDER = 'static/Images/'
@@ -160,6 +158,7 @@ def rotateSolution(solution):
 
     return rotated_solutions_str
 
+
 @app.route('/info')
 def info():
     return render_template('info.html')
@@ -183,9 +182,9 @@ def state_details(state_id):
                 os.makedirs(SUBIMAGE_FOLDER)
             else:
                 clear_image_folder(SUBIMAGE_FOLDER)
-            shutil.copy('static/'+f'Images/{image_filename}', 'static/SubImages/')
+            shutil.copy('static/' + f'Images/{image_filename}', 'static/SubImages/')
             image_url = url_for('static', filename=f'SubImages/{image_filename}')
-            
+
             return render_template('state_details.html',
                                    state=state_id,
                                    solutions=solutions,
@@ -199,31 +198,34 @@ def state_details(state_id):
 
     finally:
         conn.close()
+
+
 @app.route('/get_scramble', methods=['POST'])
 def get_scramble():
     csol = request.form.get('solution')
     # print(csol)
     csol2 = csol.replace('&#34;', '"')
     new_csol = csol2.replace('&#39;', "'")
-    #print(new_csol)
+    # print(new_csol)
     solutions = ast.literal_eval(new_csol)
     # print(solutions)
-    scrb_sol = solutions[rd.randint(0,len(solutions)-1)]
+    scrb_sol = solutions[rd.randint(0, len(solutions) - 1)]
     scrb1 = scrb_sol.split(' ')
     scrb1.reverse()
     scrb = ""
     for i in scrb1:
         if "'" in i:
-            appn = i.replace("'",'')
+            appn = i.replace("'", '')
         elif '2' in i:
             appn = i
         else:
-            appn = i+"'"
+            appn = i + "'"
         scrb = scrb + appn + " "
-    
+
     scramble = scrb[:-1]
     # print(scramble)
-    return jsonify({'scramble' : scramble})
+    return jsonify({'scramble': scramble})
+
 
 @app.route('/update_state', methods=['POST'])
 def update_state():
@@ -233,7 +235,7 @@ def update_state():
     # print(csol)
     csol2 = csol.replace('&#34;', '"')
     new_csol = csol2.replace('&#39;', "'")
-    #print(new_csol)
+    # print(new_csol)
     solutions = ast.literal_eval(new_csol)
 
     if not state_id or not rotation:
@@ -266,9 +268,8 @@ def update_state():
         else:
             rot2 = rotation
         for sol in solutions:
-            rotated_solutions.append(new_orientation(sol,rot2))
+            rotated_solutions.append(new_orientation(sol, rot2))
 
-        
         rot = getattr(_2x2Main, rotation)
         # print(state_id)
         new_state_id = str(_2x2Main.s2sList(rot(_2x2Main.sList2s(ast.literal_eval(state_id)))))
@@ -280,9 +281,9 @@ def update_state():
         new_image_url = url_for('static', filename=f'SubImages/{image_filename}')
 
         return jsonify({'new_image_url': new_image_url,
-                        'new_state_id' : new_state_id,
-                        'solutions' : rotated_solutions,
-                        'str_solutions' : str(rotated_solutions)})
+                        'new_state_id': new_state_id,
+                        'solutions': rotated_solutions,
+                        'str_solutions': str(rotated_solutions)})
 
     except sqlite3.Error as e:
         return jsonify({'error': f"Database error: {e}"}), 500
@@ -293,7 +294,7 @@ def update_state():
 # PERO IGNORANDO LOS 50 REGISTROS ANTERIORES.
 def query_states(include_tables, exclude_tables, page_number=1, page_size=50):
     def generate_table_aliases(tables):
-        return {table: f"t{idx + 1}" for idx, table in enumerate(tables)}
+        return {table: f"t{idx + 1}" for idx, table in enumerate(tables) if table}
 
     include_aliases = generate_table_aliases(include_tables)
     exclude_aliases = generate_table_aliases(exclude_tables)
