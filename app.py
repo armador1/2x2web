@@ -443,7 +443,10 @@ def search2():
     conn.close()
 
     found_state = results[0]
-    clear_image_folder(SUBIMAGE_FOLDER)
+    if not os.path.exists(SUBIMAGE_FOLDER):
+        os.makedirs(SUBIMAGE_FOLDER)
+    else:
+        clear_image_folder(SUBIMAGE_FOLDER)
     sub_st2img(found_state)
     image_filename = generate_image_name(found_state)
     image_url = url_for('static', filename=f'SubImages/{image_filename}')
