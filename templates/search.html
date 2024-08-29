@@ -23,15 +23,14 @@
                 <thead>
                     <tr>
                         <th>Image</th>
-                        <th>Moves</th>
-                        <th>Solutions</th>
+                        <th>Scramble</th>
+                        <th>OO Alg</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for state in results_missing_states %}
                         <tr>
                             <td>
-
                                 {% if state.image_url %}
                                     <a href="{{ url_for('state_details', state_id=state.state) }}" target="_blank">
                                         <img src="{{ state.image_url }}" alt="State {{ state.state }}" />
@@ -40,11 +39,13 @@
                                     No image available
                                 {% endif %}
                             </td>
-                            <td>{{ state.moves }}</td>
+                            <td>{{ state.scramble }}</td>
                             <td>
-                                {% for solution in state.solutions %}
-                                    <div class="solution" data-solution="{{ solution }}">{{ solution }}</div><br>
-                                {% endfor %}
+                                {% if state.oo %}
+                                    {{ state.oo }}
+                                {% else %}
+                                    Submit one!
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
@@ -81,6 +82,9 @@
         var results_missing_states = {{ results_missing_states | tojson }};
         document.getElementById("element-count").innerText = results_missing_states.length;
     </script>
+
+
+
 
 </body>
 </html>
