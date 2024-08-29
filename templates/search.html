@@ -32,7 +32,7 @@
                         <tr>
                             <td>
                                 {% if state.image_url %}
-                                    <a href="{{ url_for('state_details', state_id=state.state) }}" target="_blank">
+                                    <a href="{{ url_for('state_details', tstate_id=translate_state_id(state.state)) }}" target="_blank">
                                         <img src="{{ state.image_url }}" alt="State {{ state.state }}" />
                                     </a>
                                 {% else %}

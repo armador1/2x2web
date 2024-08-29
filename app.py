@@ -19,6 +19,38 @@ app = Flask(__name__)
 IMAGE_FOLDER = 'static/Images/'
 SUBIMAGE_FOLDER = 'static/SubImages/'
 
+def transl_state_id(state):
+    print(state)
+    try:
+        st = ast.literal_eval(state)
+    except:
+        st = state
+    
+    key = ['2cr','5H2','fl7','qq!','cnp','arg','jr8','mba','f08','wgi','99z','d23',
+           'avo','196','9lj','0ok','hd2','S11','aas','c!?','lpm','bad','oz9','0xl']
+    
+    tst = ''
+    for i in st:
+        tst = tst+key[i-1]
+    
+    return tst
+
+@app.context_processor
+def inject_functions():
+    return dict(translate_state_id=transl_state_id)
+
+def inv_transl_state_id(tstate):
+    
+    key = ['2cr','5H2','fl7','qq!','cnp','arg','jr8','mba','f08','wgi','99z','d23',
+           'avo','196','9lj','0ok','hd2','S11','aas','c!?','lpm','bad','oz9','0xl']
+    
+    key_list = [(tstate[i:i+3]) for i in range(0, len(tstate), 3)]
+    state_id = [0]*24
+
+    for i in range(0,len(state_id)):
+        state_id[i] = key.index(key_list[i])+1
+    
+    return str(state_id)
 
 def clear_image_folder(folder_path):
     for filename in os.listdir(folder_path):
@@ -168,8 +200,9 @@ def info():
     return render_template('info.html')
 
 
-@app.route('/state/<state_id>')
-def state_details(state_id):
+@app.route('/state/<tstate_id>')
+def state_details(tstate_id):
+    state_id = inv_transl_state_id(tstate_id)
     conn = sqlite3.connect('oo.db')
     cursor = conn.cursor()
 
@@ -212,6 +245,8 @@ def get_scramble():
     new_csol = csol2.replace('&#39;', "'")
     # print(new_csol)
     solutions = ast.literal_eval(new_csol)
+    if len(solutions) == 0:
+        return jsonify({'scramble': ''})
     # print(solutions)
     scrb_sol = solutions[rd.randint(0, len(solutions) - 1)]
     scrb1 = scrb_sol.split(' ')
@@ -354,7 +389,10 @@ def query_states(include_tables, exclude_tables, page_number=1, page_size=50):
             result_data = []
             for state, solutions_json, oo in results:
                 solutions = json.loads(solutions_json)
-                scramble_moves = main.Sol2Scr(random.choice(solutions))
+                try:
+                    scramble_moves = main.Sol2Scr(random.choice(solutions))
+                except:
+                    scramble_moves = ''
                 scramble_moves2 = [move.replace('3', "'") for move in scramble_moves]
                 scramble = ' '.join(scramble_moves2)
                 # Generar la imagen para cada estado
