@@ -402,21 +402,21 @@ def search():
                            include_tables=include_tables,
                            exclude_tables=exclude_tables)
 
+
 @app.route('/scramble_search', methods=['GET', 'POST'])
 def search2():
     if request.method == 'POST':
         scramble = request.form.get('scramble')
-    results_missing_states = None
     error = None
     super_scramble = rotateSolution(scramble)
     scr_list = super_scramble.split('\n')
     print(scr_list)
-    state_list=[]
-    for i in range(0,len(scr_list)):
+    state_list = []
+    for i in range(0, len(scr_list)):
         scraux = scr_list[i].split(' ')
         for k in range(0, len(scraux)):
             if "'" in scraux[k]:
-                scraux[k] = scraux[k].replace("'",'3')
+                scraux[k] = scraux[k].replace("'", '3')
         print(scraux)
 
         try:
@@ -429,41 +429,28 @@ def search2():
             error = 'Invalid Scramble'
     print(state_list)
 
-
     conn = sqlite3.connect('oo.db')
     cursor = conn.cursor()
-    statet = []
+
+    results = None
     for st in state_list:
-        try:
-            sql_query_include = "SELECT DISTINCT s.state FROM solutionsTable WHERE s.state = {st} s"
-            cursor.execute(sql_query_include)
-            statet = st
+        query = f"SELECT * FROM solutionsTable WHERE state = '{st}' LIMIT 1;"
+        cursor.execute(query)
+        results = cursor.fetchone()
+        if results:
             break
-        except:
-            print('Nope, no ha colado')
-            continue
-    results = cursor.fetchall()
 
-    result_data = []
-    for state, solutions_json, moves in results:
-        solutions = json.loads(solutions_json)
-        # Generar la imagen para cada estado
-        image_filename = generate_image_name(state)
-        st2img(state)
-        image_url = url_for('static', filename=f'Images/{image_filename}')
-        result_data.append({
-            'state': state,
-            'solutions': solutions,
-            'image_url': image_url,
-            'moves': moves
-        })
+    conn.close()
 
-    return render_template('search.html',
-                           results_missing_states=statet,
-                           error=error,
-                           page_number=1,
-                           include_tables=[],
-                           exclude_tables=[])
+    found_state = results[0]
+    image_filename = generate_image_name(found_state)
+    image_url = url_for('static', filename=f'Images/{image_filename}')
+
+    return render_template('state_details.html',
+                           state=found_state,
+                           solutions=json.loads(results[1]),
+                           image_url=image_url,
+                           moves=results[2])
 
 
 @app.route('/rotate_solution')
