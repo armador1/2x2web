@@ -8,6 +8,7 @@ import shutil
 import _2x2Main
 import ast
 import random as rd
+import _2x2Main as main
 
 app = Flask(__name__)
 
@@ -361,6 +362,7 @@ def query_states(include_tables, exclude_tables, page_number=1, page_size=50):
                     'image_url': image_url,
                     'moves': moves
                 })
+                print(result_data)
             return result_data
         return []
     except sqlite3.Error as e:
@@ -399,6 +401,48 @@ def search():
                            page_number=page_number,
                            include_tables=include_tables,
                            exclude_tables=exclude_tables)
+
+@app.route('/scramble_search', methods=['GET', 'POST'])
+def search2():
+    if request.method == 'POST':
+        scramble = request.form.get('scramble')
+    results_missing_states = None
+    error = None
+    super_scramble = rotate_solution(scramble)
+    scr_list = super_scramble.split('\n')
+    state_list=[]
+    for scr in scr_list:
+        for k in range(0,len(scr)):
+            if "'" in scr[k]:
+                scr[k] = scr[k][-1]+'3'
+
+        try:
+            state = main.Solved()
+            for k in scr:
+                move = getattr(main, k)
+                state = move(state)
+            state_list.append(state)
+        except:
+            error = 'Invalid Scramble'
+
+
+
+    for st in state_list:
+        try:
+            results_missing_states = query_states(st) #Cambiar por la consulta a la BD
+            if results_missing_states:
+                break
+            else:
+                continue
+        except Exception as e:
+            error = str(e)
+
+    return render_template('search.html',
+                           results_missing_states=results_missing_states,
+                           error=error,
+                           page_number=1,
+                           include_tables=[],
+                           exclude_tables=[])
 
 
 @app.route('/rotate_solution')

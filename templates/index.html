@@ -93,6 +93,12 @@
             </div>
             <input type="submit" value="Submit query">
         </form>
+        <form action="/scramble_search" method="POST">
+            <h2>Search by Scramble</h2>
+            <input type="text" id="scramble" name="scramble" size="30" placeholder="R U R' U R U2 R'"/>
+            <h3></h3>
+            <input type="submit" value="Search by scramble">
+        </form>
         <a href="{{ url_for('info') }}" target="_blank">About this page</a>
     </div>
 
