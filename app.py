@@ -1,3 +1,5 @@
+import random
+
 from flask import Flask, render_template, request, jsonify, url_for
 import sqlite3
 import json
@@ -341,28 +343,29 @@ def query_states(include_tables, exclude_tables, page_number=1, page_size=50):
 
             placeholders = ','.join('?' * len(page_states))
             sql_details_query = f"""
-                SELECT s.state, s.solutions, s.moves 
+                SELECT s.state, s.solutions, s.oo
                 FROM solutionsTable s
                 WHERE s.state IN ({placeholders})
-                ORDER BY s.moves ASC
             """
             cursor.execute(sql_details_query, page_states)
             results = cursor.fetchall()
 
             result_data = []
-            for state, solutions_json, moves in results:
+            for state, solutions_json, oo in results:
                 solutions = json.loads(solutions_json)
+                scramble_moves = main.Sol2Scr(random.choice(solutions))
+                scramble_moves2 = [move.replace('3', "'") for move in scramble_moves]
+                scramble = ' '.join(scramble_moves2)
                 # Generar la imagen para cada estado
                 image_filename = generate_image_name(state)
                 st2img(state)
                 image_url = url_for('static', filename=f'Images/{image_filename}')
                 result_data.append({
                     'state': state,
-                    'solutions': solutions,
+                    'scramble': scramble,
                     'image_url': image_url,
-                    'moves': moves
+                    'oo': oo
                 })
-                print(result_data)
             return result_data
         return []
     except sqlite3.Error as e:
@@ -380,23 +383,23 @@ def index():
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     if request.method == 'POST':
-        page_number = 1  # Resetear a la primera página en una nueva consulta
+        page_number = 1
         include_tables = request.form.getlist('tables_include')
         exclude_tables = request.form.getlist('tables_exclude')
     else:
         page_number = int(request.args.get('page', 1))
         include_tables = request.args.getlist('tables_include')
         exclude_tables = request.args.getlist('tables_exclude')
-    results_missing_states = None
+    found_states = None
     error = None
 
     try:
-        results_missing_states = query_states(include_tables, exclude_tables, page_number)
+        found_states = query_states(include_tables, exclude_tables, page_number)
     except Exception as e:
         error = str(e)
 
     return render_template('search.html',
-                           results_missing_states=results_missing_states,
+                           results_missing_states=found_states,
                            error=error,
                            page_number=page_number,
                            include_tables=include_tables,
