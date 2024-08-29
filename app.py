@@ -408,37 +408,58 @@ def search2():
         scramble = request.form.get('scramble')
     results_missing_states = None
     error = None
-    super_scramble = rotate_solution(scramble)
+    super_scramble = rotateSolution(scramble)
     scr_list = super_scramble.split('\n')
+    print(scr_list)
     state_list=[]
-    for scr in scr_list:
-        for k in range(0,len(scr)):
-            if "'" in scr[k]:
-                scr[k] = scr[k][-1]+'3'
+    for i in range(0,len(scr_list)):
+        scraux = scr_list[i].split(' ')
+        for k in range(0, len(scraux)):
+            if "'" in scraux[k]:
+                scraux[k] = scraux[k].replace("'",'3')
+        print(scraux)
 
         try:
             state = main.Solved()
-            for k in scr:
+            for k in scraux:
                 move = getattr(main, k)
                 state = move(state)
             state_list.append(main.s2sList(state))
         except:
             error = 'Invalid Scramble'
+    print(state_list)
 
 
-
+    conn = sqlite3.connect('oo.db')
+    cursor = conn.cursor()
+    statet = []
     for st in state_list:
         try:
-            results_missing_states = query_states(st) #Cambiar por la consulta a la BD
-            if results_missing_states:
-                break
-            else:
-                continue
-        except Exception as e:
-            error = str(e)
+            sql_query_include = "SELECT DISTINCT s.state FROM solutionsTable WHERE s.state = {st} s"
+            cursor.execute(sql_query_include)
+            statet = st
+            break
+        except:
+            print('Nope, no ha colado')
+            continue
+    results = cursor.fetchall()
+
+    result_data = []
+    for state, solutions_json, moves in results:
+        solutions = json.loads(solutions_json)
+        # Generar la imagen para cada estado
+        image_filename = generate_image_name(state)
+        st2img(state)
+        image_url = url_for('static', filename=f'Images/{image_filename}')
+        result_data.append({
+            'state': state,
+            'solutions': solutions,
+            'image_url': image_url,
+            'moves': moves
+        })
 
     return render_template('search.html',
-                           results_missing_states=results_missing_states,
+                           results_missing_states=statet,
                            error=error,
                            page_number=1,
                            include_tables=[],

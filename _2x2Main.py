@@ -59,6 +59,19 @@ def U3(st):
     s = copy.deepcopy(st)
     return(U(U2(s)))
 
+def R(st):
+    # Applies a R move to a given state
+    s = copy.deepcopy(st)
+    return(z(U(z3(s))))
+def R2(st):
+    # Applies a R2 move to a given state
+    s = copy.deepcopy(st)
+    return(R(R(s)))
+def R3(st):
+    # Applies a R' move to a given state
+    s = copy.deepcopy(st)
+    return(R(R2(s)))
+
 def F(st):
     # Applies a F move to a given state
     s = copy.deepcopy(st)
