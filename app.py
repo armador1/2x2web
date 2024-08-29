@@ -410,14 +410,14 @@ def search2():
     error = None
     super_scramble = rotateSolution(scramble)
     scr_list = super_scramble.split('\n')
-    print(scr_list)
+    # print(scr_list)
     state_list = []
     for i in range(0, len(scr_list)):
         scraux = scr_list[i].split(' ')
         for k in range(0, len(scraux)):
             if "'" in scraux[k]:
                 scraux[k] = scraux[k].replace("'", '3')
-        print(scraux)
+        # print(scraux)
 
         try:
             state = main.Solved()
@@ -427,7 +427,7 @@ def search2():
             state_list.append(main.s2sList(state))
         except:
             error = 'Invalid Scramble'
-    print(state_list)
+    # print(state_list)
 
     conn = sqlite3.connect('oo.db')
     cursor = conn.cursor()
@@ -443,8 +443,10 @@ def search2():
     conn.close()
 
     found_state = results[0]
+    clear_image_folder(SUBIMAGE_FOLDER)
+    sub_st2img(found_state)
     image_filename = generate_image_name(found_state)
-    image_url = url_for('static', filename=f'Images/{image_filename}')
+    image_url = url_for('static', filename=f'SubImages/{image_filename}')
 
     return render_template('state_details.html',
                            state=found_state,
