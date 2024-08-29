@@ -421,7 +421,7 @@ def search2():
             for k in scr:
                 move = getattr(main, k)
                 state = move(state)
-            state_list.append(state)
+            state_list.append(main.s2sList(state))
         except:
             error = 'Invalid Scramble'
 
