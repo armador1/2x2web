@@ -4,6 +4,7 @@ from flask import Flask, render_template, request, jsonify, url_for
 import sqlite3
 import json
 from ScrImg import st2img, generate_image_name, sub_st2img
+from TranslatedSolver import fixCorner, TranslateStList
 import os
 import re
 import shutil
@@ -240,7 +241,7 @@ def update_state():
     new_csol = csol2.replace('&#39;', "'")
     # print(new_csol)
     solutions = ast.literal_eval(new_csol)
-
+    
     if not state_id or not rotation:
         return jsonify({'error': 'Missing state_id or rotation'}), 400
 
@@ -275,7 +276,7 @@ def update_state():
 
         rot = getattr(_2x2Main, rotation)
         # print(state_id)
-        new_state_id = str(_2x2Main.s2sList(rot(_2x2Main.sList2s(ast.literal_eval(state_id)))))
+        new_state_id = str(fixCorner(TranslateStList(_2x2Main.s2sList(rot(_2x2Main.sList2s(ast.literal_eval(state_id)))))))
         # print(new_state_id)
         clear_image_folder(SUBIMAGE_FOLDER)
         image_filename = generate_image_name(new_state_id)
