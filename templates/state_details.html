@@ -39,13 +39,26 @@
         <div class="scramble">
             <h2>Scramble: <span id="scramble-text">{{ scramble }}</span></h2>
         </div>
+
+        {% if oo %}
+        <div class="details">
+            <p><strong>OO Alg:</strong> {{ oo }}</p>
+        </div>
+        {% endif %}
         
         <div class="details">
-            <p><strong>Moves:</strong> {{ moves }}</p>
+            <form
+                id="oo-form"
+                method="POST"
+                action="https://script.google.com/macros/s/AKfycbz7kn9HHsB4exl8ushgUJLmT-sy89huBuSt3RtAF-o5HgqKlPAZ8zfrj0McA2vj6ubG/exec">
+                Submit your OO alg here: <input type="text" id="ooalg" name="ooalg" required>
+                <input type="hidden" id="state" name="state" value="{{ state }}">
+                <button type="submit">Submit</button>
+            </form>
         </div>
 
         <div class="solutions">
-            <h2>Optimal solutions</h2>
+            <h2>Optimal solutions ({{ moves }} moves)</h2>
             <ul id="solutions-list">
                 {% for solution in solutions %}
                     <li>{{ solution }}</li>
@@ -115,6 +128,22 @@
 
         $(document).ready(function() {
             getScramble("{{ solutions }}");
+        });
+
+        window.addEventListener("load", function() {
+            const form = document.getElementById('oo-form');
+            form.addEventListener("submit", function(e) {
+                e.preventDefault();
+                const data = new FormData(form);
+                const action = e.target.action;
+                if(fetch(action, {
+                    method: 'POST',
+                    body: data,
+                })) {
+                    document.getElementById('ooalg').value = '';
+                    alert("Alg successfully submitted!");
+                }
+            });
         });
     </script>
 </body>
