@@ -19,6 +19,7 @@ app = Flask(__name__)
 IMAGE_FOLDER = 'static/Images/'
 SUBIMAGE_FOLDER = 'static/SubImages/'
 
+
 def transl_state_id(state):
     print(state)
     try:
@@ -35,9 +36,11 @@ def transl_state_id(state):
     
     return tst
 
+
 @app.context_processor
 def inject_functions():
     return dict(translate_state_id=transl_state_id)
+
 
 def inv_transl_state_id(tstate):
     
@@ -207,26 +210,26 @@ def state_details(tstate_id):
     cursor = conn.cursor()
 
     try:
-        # Query para obtener la información del estado específico
-        cursor.execute("SELECT solutions, moves FROM solutionsTable WHERE state = ?", (state_id,))
+        cursor.execute("SELECT solutions, moves, oo FROM solutionsTable WHERE state = ?", (state_id,))
         result = cursor.fetchone()
 
         if result:
-            solutions_json, moves = result
+            solutions_json, moves, oo = result
             solutions = json.loads(solutions_json)
             image_filename = generate_image_name(state_id)
             if not os.path.exists(SUBIMAGE_FOLDER):
                 os.makedirs(SUBIMAGE_FOLDER)
             else:
                 clear_image_folder(SUBIMAGE_FOLDER)
-            shutil.copy('static/' + f'Images/{image_filename}', 'static/SubImages/')
+            shutil.copy(f'static/Images/{image_filename}', 'static/SubImages/')
             image_url = url_for('static', filename=f'SubImages/{image_filename}')
 
             return render_template('state_details.html',
                                    state=state_id,
                                    solutions=solutions,
                                    image_url=image_url,
-                                   moves=moves)
+                                   moves=moves,
+                                   oo=oo)
         else:
             return f"Estado {state_id} no encontrado.", 404
 
