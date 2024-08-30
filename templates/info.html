@@ -42,7 +42,8 @@
         <div class="image-container">
             <img src="static/Tarasca.jpeg" width="400">
         </div>
-    <h3>What is this page?</h3>
+    <h2>General questions</h2>
+        <h3>What is this place?</h3>
     <p>
         In this webpage you can search information about <b>any</b> 2x2 state. In order to reduce the number of states, we take "equivalent"
         states as only one.
@@ -57,8 +58,8 @@
     <p>
         These states were then classified into the main advanced methods for 2x2 speedsolving. For the states that are not a case of any 
         method, we counted the number of bars and diagonals in faces for each states. The exact procedure will be explained later in this page.
-        <b>[Yet to be implemented]</b>
     </p>
+    <h2>Questions about the search engine</h2>
     <h3>How does the search work?</h3>
     <p>
         The database queries are based on two inputs: which methods you want to include in your results and what methods you want to exclude.
@@ -71,9 +72,10 @@
         In this page you can find a scramble along with all the optimal solutions for the state. Also, you can click in the buttons under 
         the image to rotate it along with the scramble and the solutions so you can find the best solution. 
     </p>
+    <h3>The rotations in the details page change the cube state, why?</h3>
     <p>
-        It is imortant to note 
-        that the colors on the image will not match those of your scrambled cube, but they will always be equivalent states.
+        Rotations are made to work so the fixed corner always stays the same. The states after the rotation may look different, but 
+        it will always be equivalent to the original.
     </p>
     <h3>What states are considered CBLs?</h3>
     <div class="contenedor2">
@@ -89,14 +91,52 @@
         <img src="{{ url_for('static', filename='CBLexample.png') }}" width="200"/>
         <figcaption><i><b><font size="+0.5">Scramble: R' U2 R F2 U' R' U F2 U' F</font></b></i></figcaption>
     </figure>
-
+    </div>
+    <h3>How do I count the bars and diagonals on a state?</h3>
+    <p>
+        There are three types of bars and two types of diagonals. A face has a bar in it if there are two, and only two, adjacent stickers with the 
+        same color. A face has a diagonal if two opposite stickers have the same color. This means that EG faces or LS faces doesn't have any bars in it.
+    </p>
+    <p>
+        Once you have found a bar, you need to check the other adjacent stickers of both pieces. If they are also of the same color, you 
+        have a Bar. If they are of opposite colors, it is called an OBar, while if they are of adjacent colors it is called a ABar.
+    </p>
+    <p>
+        Diagonals work simmilarly. Focusing in the other four stickers of the diagonal pieces, if the colors on opposite faces are opposite 
+        colors, it is called a Diag, while if they aren't it is called an ADiag.
+    </p>
+    <p>
+        After checking the six faces you will have the total bars and diagonals count for the state.
+    </p>
     
 
 
+    <h2>Questions about OO</h2>
+    <h3>What is OO?</h3>
+    <p>
+        OO stands for Objectively Optimal. The aim of this method is to find the best solution for each 2x2 state regarding speedsolving.
+        This solutions may not be optimal in moves, but they will be the fastest to execute.
+    </p>
+    <h3>How do you select the OO solution?</h3>
+    <p>
+        In each state page there is a form where anyone can submit a proposal for an OO solution. Then our team of 2x2 speedcubers 
+        try them in order to check if they are good enough.
+    </p>
+    <h3>I want to help, what do I need to write in the OO form?</h3>
+    <p>
+        In the form you can put any solution you find for the state in question. Don't worry about the orientation of your cube, you just 
+        need to write a solution that works from some orientation, the rest will be worked out by us.
+    </p>
+    <p>
+        Write your solution separating the moves by spaces. You can put any move or rotation in it (remember, moves are capital letters 
+        while rotations are lowercase). Even though we will check it later, the webpage can't assure the solution you gave us is correct, 
+        so there won't be any warnings if your solution is wrong.
+    </p>
 
 
 
-    </div>
+
+
     
     <a href="{{ url_for('index') }}" class="back-link">Return to main page</a>
     </main>
