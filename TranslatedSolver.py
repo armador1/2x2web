@@ -32,7 +32,7 @@ def fixCorner(st):
     new_st = st.copy()
     for i in range(0,len(new_st)):
         new_st[i] = f_corner.index(st[i])
-    print(antiTranslateStList(new_st))
+    # print(antiTranslateStList(new_st))
     return antiTranslateStList(new_st)
     
 

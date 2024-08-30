@@ -21,7 +21,7 @@ SUBIMAGE_FOLDER = 'static/SubImages/'
 
 
 def transl_state_id(state):
-    print(state)
+    # print(state)
     try:
         st = ast.literal_eval(state)
     except:

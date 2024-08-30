@@ -173,3 +173,42 @@ def z3(st):
     # Applies a z' rotation to a given state
     s = copy.deepcopy(st)
     return(z(z2(s)))
+
+def L(st):
+    # Applies a L move to a given state
+    s = copy.deepcopy(st)
+    return(y2(R(y2(s))))
+def L2(st):
+    # Applies a L2 move to a given state
+    s = copy.deepcopy(st)
+    return(L(L(s)))
+def L3(st):
+    # Applies a L' move to a given state
+    s = copy.deepcopy(st)
+    return(L(L2(s)))
+
+def B(st):
+    # Applies a B move to a given state
+    s = copy.deepcopy(st)
+    return(y2(F(y2(s))))
+def B2(st):
+    # Applies a B2 move to a given state
+    s = copy.deepcopy(st)
+    return(B(B(s)))
+def B3(st):
+    # Applies a b' move to a given state
+    s = copy.deepcopy(st)
+    return(B(B2(s)))
+
+def D(st):
+    # Applies a L move to a given state
+    s = copy.deepcopy(st)
+    return(x2(U(x2(s))))
+def D2(st):
+    # Applies a L2 move to a given state
+    s = copy.deepcopy(st)
+    return(D(D(s)))
+def D3(st):
+    # Applies a L' move to a given state
+    s = copy.deepcopy(st)
+    return(D(D2(s)))
