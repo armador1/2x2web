@@ -18,6 +18,30 @@ IMAGE_FOLDER = 'static/Images/'
 SUBIMAGE_FOLDER = 'static/SubImages/'
 
 
+def get_db_connection():
+    conn = sqlite3.connect("oo.db")
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def manage_folder(folder):
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    else:
+        clear_image_folder(folder)
+
+
+def clear_image_folder(folder_path):
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+
+
+def copy_image(image_filename):
+    shutil.copy(f'static/Images/{image_filename}', SUBIMAGE_FOLDER)
+
+
 def transl_state_id(state):
     try:
         st = ast.literal_eval(state)
@@ -50,13 +74,6 @@ def inv_transl_state_id(tstate):
         state_id[i] = key.index(key_list[i]) + 1
 
     return str(state_id)
-
-
-def clear_image_folder(folder_path):
-    for filename in os.listdir(folder_path):
-        file_path = os.path.join(folder_path, filename)
-        if os.path.isfile(file_path):
-            os.remove(file_path)
 
 
 def rotateSolution(solution):
@@ -122,7 +139,7 @@ def info():
 
 def methods_and_labels(state):
 
-    conn = sqlite3.connect('oo.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     tables = ["CLL", "EG1", "EG2", "TCLL", "TEG1", "TEG2", "LS", "LSEG1", "LSEG2", "CBL"]
@@ -179,7 +196,7 @@ def methods_and_labels(state):
 @app.route('/state/<tstate_id>')
 def state_details(tstate_id):
     state_id = inv_transl_state_id(tstate_id)
-    conn = sqlite3.connect('oo.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
@@ -190,11 +207,10 @@ def state_details(tstate_id):
             solutions_json, moves, oo = result
             solutions = json.loads(solutions_json)
             image_filename = generate_image_name(state_id)
-            if not os.path.exists(SUBIMAGE_FOLDER):
-                os.makedirs(SUBIMAGE_FOLDER)
-            else:
-                clear_image_folder(SUBIMAGE_FOLDER)
-            shutil.copy(f'static/Images/{image_filename}', 'static/SubImages/')
+
+            manage_folder(SUBIMAGE_FOLDER)
+            copy_image(image_filename)
+
             image_url = url_for('static', filename=f'SubImages/{image_filename}')
 
             return render_template('state_details.html',
@@ -298,9 +314,6 @@ def update_state():
         return jsonify({'error': f"Database error: {e}"}), 500
 
 
-# EL ORDEN CON LOS MOVES NO FUNCIONA BIEN DEBIDO A LA PAGINACIÓN
-# LA PAGINACIÓN HACE QUE LA WEB CREA QUE SOLO HAY 50 ESTADOS. CADA VEZ QUE SE PASA DE PÁGINA, SE HACE UNA QUERY NUEVA
-# PERO IGNORANDO LOS 50 REGISTROS ANTERIORES.
 def query_states(include_tables, exclude_tables, page_number=1, page_size=50):
     def generate_table_aliases(tables):
         return {table: f"t{idx + 1}" for idx, table in enumerate(tables) if table}
@@ -308,45 +321,38 @@ def query_states(include_tables, exclude_tables, page_number=1, page_size=50):
     include_aliases = generate_table_aliases(include_tables)
     exclude_aliases = generate_table_aliases(exclude_tables)
 
-    sql_query_include = "SELECT DISTINCT s.state FROM solutionsTable s"
+    # Construir la consulta principal
+    sql_query = "SELECT DISTINCT s.state FROM solutionsTable s"
     if include_aliases:
-        join_clauses_include = [f"JOIN {table} {alias} ON s.state = {alias}.state" for table, alias in
-                                include_aliases.items()]
-        sql_query_include += " " + " ".join(join_clauses_include)
+        join_clauses = [f"JOIN {table} {alias} ON s.state = {alias}.state" for table, alias in include_aliases.items()]
+        sql_query += " " + " ".join(join_clauses)
 
-    sql_query_exclude = None
     if exclude_aliases:
-        sql_query_exclude = "SELECT DISTINCT s.state FROM solutionsTable s"
-        join_clauses_exclude = [f"LEFT JOIN {table} {alias} ON s.state = {alias}.state" for table, alias in
-                                exclude_aliases.items()]
-        sql_query_exclude += " " + " ".join(join_clauses_exclude)
-        # Asegurar que el registro esté en al menos una tabla
+        left_join_clauses = [f"LEFT JOIN {table} {alias} ON s.state = {alias}.state" for table, alias in
+                             exclude_aliases.items()]
+        sql_query += " " + " ".join(left_join_clauses)
         where_clauses = [f"{alias}.state IS NOT NULL" for alias in exclude_aliases.values()]
-        sql_query_exclude += " WHERE " + " OR ".join(where_clauses)
+        if where_clauses:
+            sql_query += " WHERE " + " OR ".join(where_clauses)
 
-    conn = sqlite3.connect('oo.db')
+    # Ejecutar la consulta y procesar resultados
+    conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute(sql_query_include)
-        included_states = set(row[0] for row in cursor.fetchall())
-        excluded_states = set()
-        if sql_query_exclude:
-            cursor.execute(sql_query_exclude)
-            excluded_states = set(row[0] for row in cursor.fetchall())
-        missing_states = included_states - excluded_states
+        cursor.execute(sql_query)
+        states = set(row[0] for row in cursor.fetchall())
 
-        if not os.path.exists(IMAGE_FOLDER):
-            os.makedirs(IMAGE_FOLDER)
-        else:
-            clear_image_folder(IMAGE_FOLDER)
+        if not states:
+            return []
 
-        if missing_states:
-            # Ordenar y seleccionar los estados de la página actual
-            missing_states_list = sorted(missing_states)
-            start_index = (page_number - 1) * page_size
-            end_index = start_index + page_size
-            page_states = missing_states_list[start_index:end_index]
+        # Ordenar y seleccionar los estados de la página actual
+        states_list = sorted(states)
+        start_index = (page_number - 1) * page_size
+        end_index = start_index + page_size
+        page_states = states_list[start_index:end_index]
 
+        # Consultar detalles de los estados
+        if page_states:
             placeholders = ','.join('?' * len(page_states))
             sql_details_query = f"""
                 SELECT s.state, s.solutions, s.oo
@@ -359,13 +365,13 @@ def query_states(include_tables, exclude_tables, page_number=1, page_size=50):
             result_data = []
             for state, solutions_json, oo in results:
                 solutions = json.loads(solutions_json)
+                scramble_moves = ''
                 try:
                     scramble_moves = Main.Sol2Scr(random.choice(solutions))
                 except:
-                    scramble_moves = ''
+                    pass
                 scramble_moves2 = [move.replace('3', "'") for move in scramble_moves]
                 scramble = ' '.join(scramble_moves2)
-                # Generar la imagen para cada estado
                 image_filename = generate_image_name(state)
                 st2img(state)
                 image_url = url_for('static', filename=f'Images/{image_filename}')
@@ -375,7 +381,7 @@ def query_states(include_tables, exclude_tables, page_number=1, page_size=50):
                     'image_url': image_url,
                     'oo': oo
                 })
-            return result_data, len(missing_states_list)
+            return result_data, len(states_list)
         return []
     except sqlite3.Error as e:
         print(f"Error al ejecutar la consulta: {e}")
@@ -420,52 +426,52 @@ def search():
 def search2():
     if request.method == 'POST':
         scramble = request.form.get('scramble')
-    super_scramble = rotateSolution(scramble)
-    scr_list = super_scramble.split('\n')
-    state_list = []
-    for i in range(0, len(scr_list)):
-        scraux = scr_list[i].split(' ')
-        for k in range(0, len(scraux)):
-            if "'" in scraux[k]:
-                scraux[k] = scraux[k].replace("'", '3')
+        super_scramble = rotateSolution(scramble)
+        scr_list = super_scramble.split('\n')
+        state_list = []
 
-        try:
-            state = Main.Solved()
-            for k in scraux:
-                move = getattr(Main, k)
-                state = move(state)
-            state_list.append(Main.s2sList(state))
-        except:
-            print('Invalid Scramble')
+        for line in scr_list:
+            scraux = line.split(' ')
+            scraux = [s.replace("'", '3') for s in scraux]
 
-    conn = sqlite3.connect('oo.db')
-    cursor = conn.cursor()
+            try:
+                state = Main.Solved()
+                for move in scraux:
+                    move_func = getattr(Main, move)
+                    state = move_func(state)
+                state_list.append(str(Main.s2sList(state)))
+            except AttributeError:
+                print('Invalid Scramble')
+                continue
 
-    results = None
-    for st in state_list:
-        cursor.execute(f"SELECT * FROM solutionsTable WHERE state = '{st}' LIMIT 1")
-        results = cursor.fetchone()
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        results = None
+        for st in state_list:
+            cursor.execute("SELECT * FROM solutionsTable WHERE state = ? LIMIT 1", (st,))
+            results = cursor.fetchone()
+            if results:
+                break
+
+        conn.close()
+
         if results:
-            break
+            found_state = results['state']
+            manage_folder(SUBIMAGE_FOLDER)
+            sub_st2img(found_state)
+            image_filename = generate_image_name(found_state)
+            image_url = url_for('static', filename=f'SubImages/{image_filename}')
 
-    conn.close()
-
-    found_state = results[0]
-    if not os.path.exists(SUBIMAGE_FOLDER):
-        os.makedirs(SUBIMAGE_FOLDER)
-    else:
-        clear_image_folder(SUBIMAGE_FOLDER)
-    sub_st2img(found_state)
-    image_filename = generate_image_name(found_state)
-    image_url = url_for('static', filename=f'SubImages/{image_filename}')
-
-    return render_template('state_details.html',
-                           state=found_state,
-                           solutions=json.loads(results[1]),
-                           image_url=image_url,
-                           moves=results[2],
-                           oo=results[3],
-                           methods_and_labels=methods_and_labels(found_state))
+            return render_template('state_details.html',
+                                   state=found_state,
+                                   solutions=json.loads(results['solutions']),
+                                   image_url=image_url,
+                                   moves=results['moves'],
+                                   oo=results['oo'],
+                                   methods_and_labels=methods_and_labels(found_state))
+        else:
+            return "No se encontró el estado.", 404
 
 
 @app.route('/rotate_solution')
