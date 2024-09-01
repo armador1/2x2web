@@ -6,9 +6,7 @@ import json
 from ScrImg import st2img, generate_image_name, sub_st2img
 from TranslatedSolver import fixCorner, TranslateStList
 import os
-import re
 import shutil
-import _2x2Main
 import ast
 import random as rd
 import _2x2Main as main
@@ -26,14 +24,14 @@ def transl_state_id(state):
         st = ast.literal_eval(state)
     except:
         st = state
-    
-    key = ['2cr','5H2','fl7','qq!','cnp','arg','jr8','mba','f08','wgi','99z','d23',
-           'avo','196','9lj','0ok','hd2','S11','aas','c!?','lpm','bad','oz9','0xl']
-    
+
+    key = ['2cr', '5H2', 'fl7', 'qq!', 'cnp', 'arg', 'jr8', 'mba', 'f08', 'wgi', '99z', 'd23',
+           'avo', '196', '9lj', '0ok', 'hd2', 'S11', 'aas', 'c!?', 'lpm', 'bad', 'oz9', '0xl']
+
     tst = ''
     for i in st:
-        tst = tst+key[i-1]
-    
+        tst = tst + key[i - 1]
+
     return tst
 
 
@@ -43,17 +41,17 @@ def inject_functions():
 
 
 def inv_transl_state_id(tstate):
-    
-    key = ['2cr','5H2','fl7','qq!','cnp','arg','jr8','mba','f08','wgi','99z','d23',
-           'avo','196','9lj','0ok','hd2','S11','aas','c!?','lpm','bad','oz9','0xl']
-    
-    key_list = [(tstate[i:i+3]) for i in range(0, len(tstate), 3)]
-    state_id = [0]*24
+    key = ['2cr', '5H2', 'fl7', 'qq!', 'cnp', 'arg', 'jr8', 'mba', 'f08', 'wgi', '99z', 'd23',
+           'avo', '196', '9lj', '0ok', 'hd2', 'S11', 'aas', 'c!?', 'lpm', 'bad', 'oz9', '0xl']
 
-    for i in range(0,len(state_id)):
-        state_id[i] = key.index(key_list[i])+1
-    
+    key_list = [(tstate[i:i + 3]) for i in range(0, len(tstate), 3)]
+    state_id = [0] * 24
+
+    for i in range(0, len(state_id)):
+        state_id[i] = key.index(key_list[i]) + 1
+
     return str(state_id)
+
 
 def clear_image_folder(folder_path):
     for filename in os.listdir(folder_path):
@@ -62,133 +60,53 @@ def clear_image_folder(folder_path):
             os.remove(file_path)
 
 
-def new_orientation(alg, rotation):
-    # Remove spaces and replace sequences in `alg`
-    alg = alg.replace(" ", "")
-    alg = re.sub(r'U2', 'UU', alg)
-    alg = re.sub(r"U'", 'UUU', alg)
-    alg = re.sub(r'F2', 'FF', alg)
-    alg = re.sub(r"F'", 'FFF', alg)
-    alg = re.sub(r'R2', 'RR', alg)
-    alg = re.sub(r"R'", 'RRR', alg)
-    alg = re.sub(r'UUUU', '', alg)
-    alg = re.sub(r'FFFF', '', alg)
-    alg = re.sub(r'RRRR', '', alg)
-    alg = list(alg)  # Convert to list of characters
-
-    # Remove spaces and replace sequences in `rotation`
-    rotation = rotation.replace(" ", "")
-    rotation = re.sub(r'x2', 'xx', rotation)
-    rotation = re.sub(r"x'", 'xxx', rotation)
-    rotation = re.sub(r'z2', 'zz', rotation)
-    rotation = re.sub(r"z'", 'zzz', rotation)
-    rotation = re.sub(r'y2', 'yy', rotation)
-    rotation = re.sub(r"y'", 'yyy', rotation)
-    rotation = re.sub(r'y', 'xxxzx', rotation)
-    rotation = re.sub(r'x', 'xxx', rotation)
-    rotation = re.sub(r'z', 'zzz', rotation)
-    rotation = list(rotation)  # Convert to list of characters
-
-    for i in range(len(alg)):
-        rotation_str = ''.join(rotation)
-        rotation_str = re.sub(r'xxxx', '', rotation_str)
-        rotation_str = re.sub(r'zzzz', '', rotation_str)
-        rotation = list(rotation_str)
-
-        aux = []
-        for j in range(len(rotation)):
-            if alg[i] == 'U':
-                if rotation[j] == 'x':
-                    alg[i] = 'F'
-                    aux.append('x')
-                elif rotation[j] == 'z':
-                    alg[i] = 'R'
-                    aux.extend(['z', 'x', 'x', 'x'])
-            elif alg[i] == 'F':
-                if rotation[j] == 'z':
-                    alg[i] = 'F'
-                    aux.append('z')
-                elif rotation[j] == 'x':
-                    alg[i] = 'U'
-                    aux.extend(['z', 'x'])
-            elif alg[i] == 'R':
-                if rotation[j] == 'x':
-                    alg[i] = 'R'
-                    aux.append('x')
-                elif rotation[j] == 'z':
-                    alg[i] = 'U'
-                    aux.append('z')
-        rotation = aux
-
-    alg = ''.join(alg)
-
-    # Replace sequences back to notation
-    alg = re.sub(r'UUUU', '', alg)
-    alg = re.sub(r'FFFF', '', alg)
-    alg = re.sub(r'RRRR', '', alg)
-
-    alg = re.sub(r'UUU', "U'", alg)
-    alg = re.sub(r'FFF', "F'", alg)
-    alg = re.sub(r'RRR', "R'", alg)
-
-    alg = re.sub(r'UU', 'U2', alg)
-    alg = re.sub(r'FF', 'F2', alg)
-    alg = re.sub(r'RR', 'R2', alg)
-
-    alg = re.sub(r'U', ' U', alg)
-    alg = re.sub(r'F', ' F', alg)
-    alg = re.sub(r'R', ' R', alg)
-
-    return alg.strip()
-
-
 def rotateSolution(solution):
     rotated_solutions = [solution]
-    solution = new_orientation(solution, "z")
+    solution = main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "z")
+    solution = main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "z")
+    solution = main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "x")
+    solution = main.new_orientation(solution, "x")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "z")
+    solution = main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "z")
+    solution = main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "z")
+    solution = main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "x")
+    solution = main.new_orientation(solution, "x")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "z")
+    solution = main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "z")
+    solution = main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "z")
+    solution = main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "x'")
+    solution = main.new_orientation(solution, "x'")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "z")
+    solution = main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "z")
+    solution = main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "z")
+    solution = main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "x'")
+    solution = main.new_orientation(solution, "x'")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "z")
+    solution = main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "z")
+    solution = main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "z")
+    solution = main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "x")
+    solution = main.new_orientation(solution, "x")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "z")
+    solution = main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "z")
+    solution = main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = new_orientation(solution, "z")
+    solution = main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
 
     rotated_solutions = list(set(rotated_solutions))
@@ -279,7 +197,7 @@ def update_state():
     new_csol = csol2.replace('&#39;', "'")
     # print(new_csol)
     solutions = ast.literal_eval(new_csol)
-    
+
     if not state_id or not rotation:
         return jsonify({'error': 'Missing state_id or rotation'}), 400
 
@@ -310,11 +228,12 @@ def update_state():
         else:
             rot2 = rotation
         for sol in solutions:
-            rotated_solutions.append(new_orientation(sol, rot2))
+            rotated_solutions.append(main.new_orientation(sol, rot2))
 
-        rot = getattr(_2x2Main, rotation)
+        rot = getattr(main, rotation)
         # print(state_id)
-        new_state_id = str(fixCorner(TranslateStList(_2x2Main.s2sList(rot(_2x2Main.sList2s(ast.literal_eval(state_id)))))))
+        new_state_id = str(
+            fixCorner(TranslateStList(main.s2sList(rot(main.sList2s(ast.literal_eval(state_id)))))))
         # print(new_state_id)
         clear_image_folder(SUBIMAGE_FOLDER)
         image_filename = generate_image_name(new_state_id)

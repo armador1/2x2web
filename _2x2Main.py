@@ -1,4 +1,5 @@
 import copy
+import re
 
 
 def Solved():
@@ -212,3 +213,85 @@ def D3(st):
     # Applies a L' move to a given state
     s = copy.deepcopy(st)
     return(D(D2(s)))
+
+
+def new_orientation(alg, rotation):
+    # Remove spaces and replace sequences in `alg`
+    if not rotation:
+        return alg
+    alg = alg.replace(" ", "")
+    alg = re.sub(r'U2', 'UU', alg)
+    alg = re.sub(r"U'", 'UUU', alg)
+    alg = re.sub(r'F2', 'FF', alg)
+    alg = re.sub(r"F'", 'FFF', alg)
+    alg = re.sub(r'R2', 'RR', alg)
+    alg = re.sub(r"R'", 'RRR', alg)
+    alg = re.sub(r'UUUU', '', alg)
+    alg = re.sub(r'FFFF', '', alg)
+    alg = re.sub(r'RRRR', '', alg)
+    alg = list(alg)  # Convert to list of characters
+
+    # Remove spaces and replace sequences in `rotation`
+    rotation = rotation.replace(" ", "")
+    rotation = re.sub(r'x2', 'xx', rotation)
+    rotation = re.sub(r"x'", 'xxx', rotation)
+    rotation = re.sub(r'z2', 'zz', rotation)
+    rotation = re.sub(r"z'", 'zzz', rotation)
+    rotation = re.sub(r'y2', 'yy', rotation)
+    rotation = re.sub(r"y'", 'yyy', rotation)
+    rotation = re.sub(r'y', 'xxxzx', rotation)
+    rotation = re.sub(r'x', 'xxx', rotation)
+    rotation = re.sub(r'z', 'zzz', rotation)
+    rotation = list(rotation)  # Convert to list of characters
+
+    for i in range(len(alg)):
+        rotation_str = ''.join(rotation)
+        rotation_str = re.sub(r'xxxx', '', rotation_str)
+        rotation_str = re.sub(r'zzzz', '', rotation_str)
+        rotation = list(rotation_str)
+
+        aux = []
+        for j in range(len(rotation)):
+            if alg[i] == 'U':
+                if rotation[j] == 'x':
+                    alg[i] = 'F'
+                    aux.append('x')
+                elif rotation[j] == 'z':
+                    alg[i] = 'R'
+                    aux.extend(['z', 'x', 'x', 'x'])
+            elif alg[i] == 'F':
+                if rotation[j] == 'z':
+                    alg[i] = 'F'
+                    aux.append('z')
+                elif rotation[j] == 'x':
+                    alg[i] = 'U'
+                    aux.extend(['z', 'x'])
+            elif alg[i] == 'R':
+                if rotation[j] == 'x':
+                    alg[i] = 'R'
+                    aux.append('x')
+                elif rotation[j] == 'z':
+                    alg[i] = 'U'
+                    aux.append('z')
+        rotation = aux
+
+    alg = ''.join(alg)
+
+    # Replace sequences back to notation
+    alg = re.sub(r'UUUU', '', alg)
+    alg = re.sub(r'FFFF', '', alg)
+    alg = re.sub(r'RRRR', '', alg)
+
+    alg = re.sub(r'UUU', "U'", alg)
+    alg = re.sub(r'FFF', "F'", alg)
+    alg = re.sub(r'RRR', "R'", alg)
+
+    alg = re.sub(r'UU', 'U2', alg)
+    alg = re.sub(r'FF', 'F2', alg)
+    alg = re.sub(r'RR', 'R2', alg)
+
+    alg = re.sub(r'U', ' U', alg)
+    alg = re.sub(r'F', ' F', alg)
+    alg = re.sub(r'R', ' R', alg)
+
+    return alg.strip()
