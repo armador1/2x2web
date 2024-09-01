@@ -46,8 +46,18 @@ for a in file:
             break
         if main.sList2s(fixCorner(TranslateStList(main.s2sList(dummy)))) == main.Solved():
             new_st = states[i]
+            try:
+                rotf = ''
+                rotlist = rots[1:i+1]
+                for k in rotlist:    
+                    add = k.replace('3','xx')
+                    rotf = rotf + add
+            except Exception as error:
+                rotf = ''
+            print(rotf)
             checked.write("%s\t" % str(state))
             checked.write("%s\t" % str(new_st))
+            checked.write("%s\t" % rotf)
             checked.write("%s" % oo)
             control=1
             break
