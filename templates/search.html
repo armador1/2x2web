@@ -18,7 +18,7 @@
     <div class="container">
         <a href="{{ url_for('index') }}" class="back-link">Return to main page</a>
         {% if results_missing_states %}
-            <h2>Found <span id="element-count"></span> states</h2>
+            <h2>Found {{ number_results }} states</h2>
             <table>
                 <thead>
                     <tr>
@@ -77,14 +77,6 @@
     <footer style="background-color: #f4f4f9; text-align: center; padding: 10px; margin-top: 20px; color: #666;">
         <p>Developed by <a href="https://www.worldcubeassociation.org/persons/2015SALO01" target="_blank">Álvaro Aguilar Salobreña</a> and <a href="https://www.worldcubeassociation.org/persons/2016GALA04" target="_blank">Andrés Rodríguez Galán</a></p>
     </footer>
-
-    <script>
-        var results_missing_states = {{ results_missing_states | tojson }};
-        document.getElementById("element-count").innerText = results_missing_states.length;
-    </script>
-
-
-
 
 </body>
 </html>

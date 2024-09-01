@@ -12,7 +12,7 @@
 
 <body>
     <header>
-        <h1>State Details</span></h1>
+        <h1>State Details</h1>
     </header>
 
     <main class="container">
@@ -34,16 +34,27 @@
             <button class="btn" onclick="updateState('y2')">y2</button>
             <button class="btn" onclick="updateState('z2')">z2</button>
         </div>
-        
+
+        <div class="bubbles">
+            {% for item in methods_and_labels %}
+                {% if item.is_number %}
+                    {% if item.condition > 0 %}
+                        <span class="bubble {{ item.class }}">{{ item.condition }} {{ item.label }}{% if item.condition > 1 %}s{% endif %}</span>
+                    {% endif %}
+                {% elif item.condition %}
+                    <span class="bubble {{ item.class }}">{{ item.label }}</span>
+                {% endif %}
+            {% endfor %}
+        </div>
 
         <div class="scramble">
             <h2>Scramble: <span id="scramble-text">{{ scramble }}</span></h2>
         </div>
 
         {% if oo %}
-        <div class="details">
-            <p><strong>OO Alg:</strong> {{ oo }}</p>
-        </div>
+            <div class="details">
+                <p><strong>OO Alg:</strong> {{ oo }}</p>
+            </div>
         {% endif %}
         
         <div class="details">
