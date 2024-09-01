@@ -321,38 +321,42 @@ def query_states(include_tables, exclude_tables, page_number=1, page_size=50):
     include_aliases = generate_table_aliases(include_tables)
     exclude_aliases = generate_table_aliases(exclude_tables)
 
-    # Construir la consulta principal
-    sql_query = "SELECT DISTINCT s.state FROM solutionsTable s"
+    sql_query_include = "SELECT DISTINCT s.state FROM solutionsTable s"
     if include_aliases:
-        join_clauses = [f"JOIN {table} {alias} ON s.state = {alias}.state" for table, alias in include_aliases.items()]
-        sql_query += " " + " ".join(join_clauses)
+        join_clauses_include = [f"JOIN {table} {alias} ON s.state = {alias}.state" for table, alias in
+                                include_aliases.items()]
+        sql_query_include += " " + " ".join(join_clauses_include)
 
+    sql_query_exclude = None
     if exclude_aliases:
-        left_join_clauses = [f"LEFT JOIN {table} {alias} ON s.state = {alias}.state" for table, alias in
-                             exclude_aliases.items()]
-        sql_query += " " + " ".join(left_join_clauses)
+        sql_query_exclude = "SELECT DISTINCT s.state FROM solutionsTable s"
+        join_clauses_exclude = [f"LEFT JOIN {table} {alias} ON s.state = {alias}.state" for table, alias in
+                                exclude_aliases.items()]
+        sql_query_exclude += " " + " ".join(join_clauses_exclude)
+        # Asegurar que el registro esté en al menos una tabla
         where_clauses = [f"{alias}.state IS NOT NULL" for alias in exclude_aliases.values()]
-        if where_clauses:
-            sql_query += " WHERE " + " OR ".join(where_clauses)
+        sql_query_exclude += " WHERE " + " OR ".join(where_clauses)
 
-    # Ejecutar la consulta y procesar resultados
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute(sql_query)
-        states = set(row[0] for row in cursor.fetchall())
+        cursor.execute(sql_query_include)
+        included_states = set(row[0] for row in cursor.fetchall())
+        excluded_states = set()
+        if sql_query_exclude:
+            cursor.execute(sql_query_exclude)
+            excluded_states = set(row[0] for row in cursor.fetchall())
+        missing_states = included_states - excluded_states
 
-        if not states:
-            return []
+        manage_folder(IMAGE_FOLDER)
 
-        # Ordenar y seleccionar los estados de la página actual
-        states_list = sorted(states)
-        start_index = (page_number - 1) * page_size
-        end_index = start_index + page_size
-        page_states = states_list[start_index:end_index]
+        if missing_states:
+            # Ordenar y seleccionar los estados de la página actual
+            missing_states_list = sorted(missing_states)
+            start_index = (page_number - 1) * page_size
+            end_index = start_index + page_size
+            page_states = missing_states_list[start_index:end_index]
 
-        # Consultar detalles de los estados
-        if page_states:
             placeholders = ','.join('?' * len(page_states))
             sql_details_query = f"""
                 SELECT s.state, s.solutions, s.oo
@@ -365,13 +369,13 @@ def query_states(include_tables, exclude_tables, page_number=1, page_size=50):
             result_data = []
             for state, solutions_json, oo in results:
                 solutions = json.loads(solutions_json)
-                scramble_moves = ''
                 try:
                     scramble_moves = Main.Sol2Scr(random.choice(solutions))
                 except:
-                    pass
+                    scramble_moves = ''
                 scramble_moves2 = [move.replace('3', "'") for move in scramble_moves]
                 scramble = ' '.join(scramble_moves2)
+                # Generar la imagen para cada estado
                 image_filename = generate_image_name(state)
                 st2img(state)
                 image_url = url_for('static', filename=f'Images/{image_filename}')
@@ -381,7 +385,7 @@ def query_states(include_tables, exclude_tables, page_number=1, page_size=50):
                     'image_url': image_url,
                     'oo': oo
                 })
-            return result_data, len(states_list)
+            return result_data, len(missing_states_list)
         return []
     except sqlite3.Error as e:
         print(f"Error al ejecutar la consulta: {e}")
