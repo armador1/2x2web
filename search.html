@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='icon.ico') }}">
+    <title>Check States</title>
+</head>
+
+<body>
+
+    <header>
+        <h1>Optimal 2x2x2 Cube</h1>
+    </header>
+
+    <div class="container">
+        <a href="{{ url_for('index') }}" class="back-link">Return to main page</a>
+        {% if results_missing_states %}
+            <h2>Found {{ number_results }} states</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Scramble</th>
+                        <th>OO Alg</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for state in results_missing_states %}
+                        <tr>
+                            <td>
+                                {% if state.image_url %}
+                                    <a href="{{ url_for('state_details', tstate_id=translate_state_id(state.state)) }}" target="_blank">
+                                        <img src="{{ state.image_url }}" alt="State {{ state.state }}" />
+                                    </a>
+                                {% else %}
+                                    No image available
+                                {% endif %}
+                            </td>
+                            <td>{{ state.scramble }}</td>
+                            <td>
+                                {% if state.oo %}
+                                    {{ state.oo }}
+                                {% else %}
+                                    Submit one!
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+
+            <div class="pagination">
+                {% if page_number > 1 %}
+                    <a href="?page={{ page_number - 1 }}{% for table in include_tables %}&tables_include={{ table }}{% endfor %}{% for table in exclude_tables %}&tables_exclude={{ table }}{% endfor %}">Previous</a>
+                {% endif %}
+                <span>Page {{ page_number }}</span>
+                {% if results_missing_states|length == 50 %}
+                    <a href="?page={{ page_number + 1 }}{% for table in include_tables %}&tables_include={{ table }}{% endfor %}{% for table in exclude_tables %}&tables_exclude={{ table }}{% endfor %}">Next</a>
+                {% endif %}
+            </div>
+        {% else %}
+            <p>No found states fulfilling the requirements</p>
+        {% endif %}
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <a href="{{ url_for('index') }}" class="back-link">Return to main page</a>
+
+    </div>
+
+    <footer style="background-color: #f4f4f9; text-align: center; padding: 10px; margin-top: 20px; color: #666;">
+        <p>Developed by <a href="https://www.worldcubeassociation.org/persons/2015SALO01" target="_blank">Álvaro Aguilar Salobreña</a> and <a href="https://www.worldcubeassociation.org/persons/2016GALA04" target="_blank">Andrés Rodríguez Galán</a></p>
+    </footer>
+
+</body>
+</html>

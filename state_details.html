@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='icon.ico') }}">
+    <title>State Details</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <header>
+        <h1>State Details</h1>
+    </header>
+
+    <main class="container">
+        <div class="image-container">
+            <img id="state-image" src="{{ image_url }}" alt="Imagen del Estado" class="state-image">
+        </div>
+
+
+        <div class="buttons">
+            <button class="btn" onclick="updateState('x')">x</button>
+            <button class="btn" onclick="updateState('x3')">x'</button>
+            <button class="btn" onclick="updateState('y')">y</button>
+            <button class="btn" onclick="updateState('y3')">y'</button>
+            <button class="btn" onclick="updateState('z')">z</button>
+            <button class="btn" onclick="updateState('z3')">z'</button>
+        </div>
+        <div class="buttons">
+            <button class="btn" onclick="updateState('x2')">x2</button>
+            <button class="btn" onclick="updateState('y2')">y2</button>
+            <button class="btn" onclick="updateState('z2')">z2</button>
+        </div>
+
+        <div class="bubbles">
+            {% for item in methods_and_labels %}
+                {% if item.is_number %}
+                    {% if item.condition > 0 %}
+                        <span class="bubble {{ item.class }}">{{ item.condition }} {{ item.label }}{% if item.condition > 1 %}s{% endif %}</span>
+                    {% endif %}
+                {% elif item.condition %}
+                    <span class="bubble {{ item.class }}">{{ item.label }}</span>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="scramble">
+            <h2>Scramble: <span id="scramble-text">{{ scramble }}</span></h2>
+        </div>
+
+        {% if oo %}
+            <div class="details">
+                <p><strong>OO Alg:</strong> {{ oo }}</p>
+            </div>
+        {% endif %}
+        
+        <div class="details">
+            <form
+                id="oo-form"
+                method="POST"
+                action="https://script.google.com/macros/s/AKfycbz7kn9HHsB4exl8ushgUJLmT-sy89huBuSt3RtAF-o5HgqKlPAZ8zfrj0McA2vj6ubG/exec">
+                Submit your OO alg here: <input type="text" id="ooalg" name="ooalg" required>
+                <input type="hidden" id="state" name="state" value="{{ state }}">
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+
+        <div class="solutions">
+            <h2>Optimal solutions ({{ moves }} moves)</h2>
+            <ul id="solutions-list">
+                {% for solution in solutions %}
+                    <li>{{ solution }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <a href="{{ url_for('index') }}" class="back-link">Return to main page</a>
+
+    </main>
+
+    <script>
+        let currentStateId = "{{ state }}";  // Guardar el estado actual
+        let currentSolutions = "{{ solutions }}";
+
+        function updateState(rotation) {
+            $.ajax({
+                url: "{{ url_for('update_state') }}",
+                type: "POST",
+                data: {
+                    state_id: currentStateId,
+                    rotation: rotation,
+                    csol : currentSolutions
+                },
+                success: function(response) {
+                    if (response.error) {
+                        alert("Error al actualizar el estado: " + response.error);
+                        return;
+                    }
+                    // Actualizar la imagen y el state_id
+                    $("#state-image").attr("src", response.new_image_url);
+                    $("#state-id").text(response.new_state_id);
+                    currentStateId = response.new_state_id;  // Actualizar el estado actual
+                    currentSolutions = response.str_solutions;
+
+                    // Actualizar la lista de soluciones
+                    var solutionsList = $("#solutions-list");
+                    solutionsList.empty();
+                    response.solutions.forEach(function(solution) {
+                        solutionsList.append("<li>" + solution + "</li>");
+                    });
+
+                    getScramble(currentSolutions);
+                },
+                error: function() {
+                    alert("Error al actualizar el estado.");
+                }
+            });
+        }
+
+        function getScramble(solutions) {
+            $.ajax({
+                url: "{{ url_for('get_scramble') }}",  // Ruta que define la mezcla
+                type: "POST",
+                data: {
+                    solution: solutions
+                },
+                success: function(response) {
+                    // Actualizar el cuadro de texto con la mezcla generada
+                    $("#scramble-text").text(response.scramble);
+                },
+                error: function() {
+                    alert("Error al generar la mezcla.");
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            getScramble("{{ solutions }}");
+        });
+
+        window.addEventListener("load", function() {
+            const form = document.getElementById('oo-form');
+            form.addEventListener("submit", function(e) {
+                e.preventDefault();
+                const data = new FormData(form);
+                const action = e.target.action;
+                if(fetch(action, {
+                    method: 'POST',
+                    body: data,
+                })) {
+                    document.getElementById('ooalg').value = '';
+                    alert("Alg successfully submitted!");
+                }
+            });
+        });
+    </script>
+</body>
+</html>

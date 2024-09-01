@@ -9,7 +9,7 @@ import os
 import shutil
 import ast
 import random as rd
-import _2x2Main as main
+import _2x2Main as Main
 
 app = Flask(__name__)
 
@@ -19,7 +19,6 @@ SUBIMAGE_FOLDER = 'static/SubImages/'
 
 
 def transl_state_id(state):
-    # print(state)
     try:
         st = ast.literal_eval(state)
     except:
@@ -62,51 +61,51 @@ def clear_image_folder(folder_path):
 
 def rotateSolution(solution):
     rotated_solutions = [solution]
-    solution = main.new_orientation(solution, "z")
+    solution = Main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "z")
+    solution = Main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "z")
+    solution = Main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "x")
+    solution = Main.new_orientation(solution, "x")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "z")
+    solution = Main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "z")
+    solution = Main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "z")
+    solution = Main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "x")
+    solution = Main.new_orientation(solution, "x")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "z")
+    solution = Main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "z")
+    solution = Main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "z")
+    solution = Main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "x'")
+    solution = Main.new_orientation(solution, "x'")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "z")
+    solution = Main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "z")
+    solution = Main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "z")
+    solution = Main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "x'")
+    solution = Main.new_orientation(solution, "x'")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "z")
+    solution = Main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "z")
+    solution = Main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "z")
+    solution = Main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "x")
+    solution = Main.new_orientation(solution, "x")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "z")
+    solution = Main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "z")
+    solution = Main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
-    solution = main.new_orientation(solution, "z")
+    solution = Main.new_orientation(solution, "z")
     rotated_solutions.append(solution)
 
     rotated_solutions = list(set(rotated_solutions))
@@ -119,6 +118,67 @@ def rotateSolution(solution):
 @app.route('/info')
 def info():
     return render_template('info.html')
+
+
+def methods_and_labels(state):
+
+    conn = sqlite3.connect('oo.db')
+    cursor = conn.cursor()
+
+    tables = ["CLL", "EG1", "EG2", "TCLL", "TEG1", "TEG2", "LS", "LSEG1", "LSEG2", "CBL"]
+    methods = []
+
+    for table in tables:
+        cursor.execute(f"SELECT 1 FROM {table} WHERE state = '{state}' LIMIT 1")
+        methods.append(cursor.fetchone() is not None)
+
+    bar_tables = [f"Bar_{i}" for i in range(9)]
+
+    for table in bar_tables:
+        cursor.execute(f"SELECT 1 FROM {table} WHERE state = '{state}' LIMIT 1")
+        if cursor.fetchone():
+            methods.append(int(table[4:]))
+
+    abar_tables = [f"ABar_{i}" for i in range(7)]
+
+    for table in abar_tables:
+        cursor.execute(f"SELECT 1 FROM {table} WHERE state = '{state}' LIMIT 1")
+        if cursor.fetchone():
+            methods.append(int(table[5:]))
+
+    obar_tables = [f"OBar_{i}" for i in range(9)]
+    obar_tables.append("OBar_12")
+
+    for table in obar_tables:
+        cursor.execute(f"SELECT 1 FROM {table} WHERE state = '{state}' LIMIT 1")
+        if cursor.fetchone():
+            methods.append(int(table[5:]))
+
+    diag_tables = [f"Diag_{i}" for i in range(9)]
+
+    for table in diag_tables:
+        cursor.execute(f"SELECT 1 FROM {table} WHERE state = '{state}' LIMIT 1")
+        if cursor.fetchone():
+            methods.append(int(table[5:]))
+
+    adiag_tables = [f"ADiag_{i}" for i in range(7)]
+
+    for table in adiag_tables:
+        cursor.execute(f"SELECT 1 FROM {table} WHERE state = '{state}' LIMIT 1")
+        if cursor.fetchone():
+            methods.append(int(table[6:]))
+
+    conn.close()
+
+    methods2 = [{"condition": methods[tables.index(table)], "label": table, "class": f"bubble-{table}",
+                 "is_number": False} for table in tables]
+    methods2.append({"condition": methods[10], "label": "Bar", "class": "bubble-bar", "is_number": True})
+    methods2.append({"condition": methods[11], "label": "Adj Bar", "class": "bubble-abar", "is_number": True})
+    methods2.append({"condition": methods[12], "label": "Opp Bar", "class": "bubble-obar", "is_number": True})
+    methods2.append({"condition": methods[13], "label": "Diag", "class": "bubble-diag", "is_number": True})
+    methods2.append({"condition": methods[14], "label": "Adj Diag", "class": "bubble-adiag", "is_number": True})
+
+    return methods2
 
 
 @app.route('/state/<tstate_id>')
@@ -147,7 +207,8 @@ def state_details(tstate_id):
                                    solutions=solutions,
                                    image_url=image_url,
                                    moves=moves,
-                                   oo=oo)
+                                   oo=oo,
+                                   methods_and_labels=methods_and_labels(state_id))
         else:
             return f"Estado {state_id} no encontrado.", 404
 
@@ -161,14 +222,11 @@ def state_details(tstate_id):
 @app.route('/get_scramble', methods=['POST'])
 def get_scramble():
     csol = request.form.get('solution')
-    # print(csol)
     csol2 = csol.replace('&#34;', '"')
     new_csol = csol2.replace('&#39;', "'")
-    # print(new_csol)
     solutions = ast.literal_eval(new_csol)
     if len(solutions) == 0:
         return jsonify({'scramble': ''})
-    # print(solutions)
     scrb_sol = solutions[rd.randint(0, len(solutions) - 1)]
     scrb1 = scrb_sol.split(' ')
     scrb1.reverse()
@@ -183,7 +241,6 @@ def get_scramble():
         scrb = scrb + appn + " "
 
     scramble = scrb[:-1]
-    # print(scramble)
     return jsonify({'scramble': scramble})
 
 
@@ -192,10 +249,8 @@ def update_state():
     state_id = request.form.get('state_id')
     rotation = request.form.get('rotation')
     csol = request.form.get('csol')
-    # print(csol)
     csol2 = csol.replace('&#34;', '"')
     new_csol = csol2.replace('&#39;', "'")
-    # print(new_csol)
     solutions = ast.literal_eval(new_csol)
 
     if not state_id or not rotation:
@@ -228,13 +283,11 @@ def update_state():
         else:
             rot2 = rotation
         for sol in solutions:
-            rotated_solutions.append(main.new_orientation(sol, rot2))
+            rotated_solutions.append(Main.new_orientation(sol, rot2))
 
-        rot = getattr(main, rotation)
-        # print(state_id)
+        rot = getattr(Main, rotation)
         new_state_id = str(
-            fixCorner(TranslateStList(main.s2sList(rot(main.sList2s(ast.literal_eval(state_id)))))))
-        # print(new_state_id)
+            fixCorner(TranslateStList(Main.s2sList(rot(Main.sList2s(ast.literal_eval(state_id)))))))
         clear_image_folder(SUBIMAGE_FOLDER)
         image_filename = generate_image_name(new_state_id)
         sub_st2img(new_state_id)
@@ -312,7 +365,7 @@ def query_states(include_tables, exclude_tables, page_number=1, page_size=50):
             for state, solutions_json, oo in results:
                 solutions = json.loads(solutions_json)
                 try:
-                    scramble_moves = main.Sol2Scr(random.choice(solutions))
+                    scramble_moves = Main.Sol2Scr(random.choice(solutions))
                 except:
                     scramble_moves = ''
                 scramble_moves2 = [move.replace('3', "'") for move in scramble_moves]
@@ -327,7 +380,7 @@ def query_states(include_tables, exclude_tables, page_number=1, page_size=50):
                     'image_url': image_url,
                     'oo': oo
                 })
-            return result_data
+            return result_data, len(missing_states_list)
         return []
     except sqlite3.Error as e:
         print(f"Error al ejecutar la consulta: {e}")
@@ -360,7 +413,8 @@ def search():
         error = str(e)
 
     return render_template('search.html',
-                           results_missing_states=found_states,
+                           results_missing_states=found_states[0],
+                           number_results=found_states[1],
                            error=error,
                            page_number=page_number,
                            include_tables=include_tables,
@@ -371,35 +425,30 @@ def search():
 def search2():
     if request.method == 'POST':
         scramble = request.form.get('scramble')
-    error = None
     super_scramble = rotateSolution(scramble)
     scr_list = super_scramble.split('\n')
-    # print(scr_list)
     state_list = []
     for i in range(0, len(scr_list)):
         scraux = scr_list[i].split(' ')
         for k in range(0, len(scraux)):
             if "'" in scraux[k]:
                 scraux[k] = scraux[k].replace("'", '3')
-        # print(scraux)
 
         try:
-            state = main.Solved()
+            state = Main.Solved()
             for k in scraux:
-                move = getattr(main, k)
+                move = getattr(Main, k)
                 state = move(state)
-            state_list.append(main.s2sList(state))
+            state_list.append(Main.s2sList(state))
         except:
-            error = 'Invalid Scramble'
-    # print(state_list)
+            print('Invalid Scramble')
 
     conn = sqlite3.connect('oo.db')
     cursor = conn.cursor()
 
     results = None
     for st in state_list:
-        query = f"SELECT * FROM solutionsTable WHERE state = '{st}' LIMIT 1;"
-        cursor.execute(query)
+        cursor.execute(f"SELECT * FROM solutionsTable WHERE state = '{st}' LIMIT 1")
         results = cursor.fetchone()
         if results:
             break
@@ -419,7 +468,9 @@ def search2():
                            state=found_state,
                            solutions=json.loads(results[1]),
                            image_url=image_url,
-                           moves=results[2])
+                           moves=results[2],
+                           oo=results[3],
+                           methods_and_labels=methods_and_labels(found_state))
 
 
 @app.route('/rotate_solution')

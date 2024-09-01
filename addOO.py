@@ -4,7 +4,7 @@ import json
 import shutil
 
 
-def add_OO(old_state, new_state, alg, rotation):
+def add_OO(old_state, new_state, rotation, alg):
 
     conn = sqlite3.connect('oo.db')
     cursor = conn.cursor()
