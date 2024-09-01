@@ -191,6 +191,86 @@ td img {
     text-decoration: none;
     border-radius: 4px;
 }
+
 .back-link:hover {
     background-color: #0056b3;
+}
+
+.bubbles {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 10px;
+    gap: 10px;
+}
+
+.bubble {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 12px;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    background-color: #007bff;
+}
+
+.bubble-CLL {
+    background-color: #FF0000;
+}
+
+.bubble-EG1 {
+    background-color: #00FF00;
+}
+
+.bubble-EG2 {
+    background-color: #0000FF;
+}
+
+.bubble-TCLL {
+    background-color: #FFFF00;
+}
+
+.bubble-TEG1 {
+    background-color: #FF00FF;
+}
+
+.bubble-TEG2 {
+    background-color: #00FFFF;
+}
+
+.bubble-LS {
+    background-color: #FFA500;
+}
+
+.bubble-LSEG1 {
+    background-color: #FFC0CB;
+}
+
+.bubble-LSEG2 {
+    background-color: #800080;
+}
+
+.bubble-CBL {
+    background-color: #8B4513;
+}
+
+.bubble-bar {
+    background-color: #FF6347;
+}
+
+.bubble-abar {
+    background-color: #ADFF2F;
+}
+
+.bubble-obar {
+    background-color: #4B0082;
+}
+
+.bubble-diag {
+    background-color: #FFD700;
+}
+
+.bubble-adiag {
+    background-color: #008080;
 }
