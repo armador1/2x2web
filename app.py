@@ -126,57 +126,52 @@ def methods_and_labels(state):
     cursor = conn.cursor()
 
     tables = ["CLL", "EG1", "EG2", "TCLL", "TEG1", "TEG2", "LS", "LSEG1", "LSEG2", "CBL"]
+
     methods = []
 
+    def check_table(table_prefix, end_index, extra_table=None):
+        for i in range(0, end_index):
+            table = f"{table_prefix}_{i}"
+            cursor.execute(f"SELECT 1 FROM {table} WHERE state = ? LIMIT 1", (state,))
+            if cursor.fetchone():
+                methods.append(i)
+        if extra_table:
+            cursor.execute(f"SELECT 1 FROM {extra_table} WHERE state = ? LIMIT 1", (state,))
+            if cursor.fetchone():
+                methods.append(int(extra_table.split('_')[1]))
+
     for table in tables:
-        cursor.execute(f"SELECT 1 FROM {table} WHERE state = '{state}' LIMIT 1")
+        cursor.execute(f"SELECT 1 FROM {table} WHERE state = ? LIMIT 1", (state,))
         methods.append(cursor.fetchone() is not None)
 
-    bar_tables = [f"Bar_{i}" for i in range(9)]
+    check_table("Bar", 9)
+    check_table("ABar", 7)
+    check_table("OBar", 9, "OBar_12")
+    check_table("Diag", 9)
+    check_table("ADiag", 7)
 
-    for table in bar_tables:
-        cursor.execute(f"SELECT 1 FROM {table} WHERE state = '{state}' LIMIT 1")
-        if cursor.fetchone():
-            methods.append(int(table[4:]))
-
-    abar_tables = [f"ABar_{i}" for i in range(7)]
-
-    for table in abar_tables:
-        cursor.execute(f"SELECT 1 FROM {table} WHERE state = '{state}' LIMIT 1")
-        if cursor.fetchone():
-            methods.append(int(table[5:]))
-
-    obar_tables = [f"OBar_{i}" for i in range(9)]
-    obar_tables.append("OBar_12")
-
-    for table in obar_tables:
-        cursor.execute(f"SELECT 1 FROM {table} WHERE state = '{state}' LIMIT 1")
-        if cursor.fetchone():
-            methods.append(int(table[5:]))
-
-    diag_tables = [f"Diag_{i}" for i in range(9)]
-
-    for table in diag_tables:
-        cursor.execute(f"SELECT 1 FROM {table} WHERE state = '{state}' LIMIT 1")
-        if cursor.fetchone():
-            methods.append(int(table[5:]))
-
-    adiag_tables = [f"ADiag_{i}" for i in range(7)]
-
-    for table in adiag_tables:
-        cursor.execute(f"SELECT 1 FROM {table} WHERE state = '{state}' LIMIT 1")
-        if cursor.fetchone():
-            methods.append(int(table[6:]))
+    methods2 = [
+        {"condition": cursor.execute(f"SELECT 1 FROM {table} WHERE state = ? LIMIT 1",
+                                                                  (state,)).fetchone() is not None,
+         "label": table, "class": f"bubble-{table.lower()}", "is_number": False}
+        for table in tables
+    ]
 
     conn.close()
 
-    methods2 = [{"condition": methods[tables.index(table)], "label": table, "class": f"bubble-{table}",
-                 "is_number": False} for table in tables]
-    methods2.append({"condition": methods[10], "label": "Bar", "class": "bubble-bar", "is_number": True})
-    methods2.append({"condition": methods[11], "label": "Adj Bar", "class": "bubble-abar", "is_number": True})
-    methods2.append({"condition": methods[12], "label": "Opp Bar", "class": "bubble-obar", "is_number": True})
-    methods2.append({"condition": methods[13], "label": "Diag", "class": "bubble-diag", "is_number": True})
-    methods2.append({"condition": methods[14], "label": "Adj Diag", "class": "bubble-adiag", "is_number": True})
+    def add_method(label, index_offset):
+        methods2.append({
+            "condition": methods[index_offset],
+            "label": label,
+            "class": f"bubble-{label.lower()}",
+            "is_number": True
+        })
+
+    add_method("Bar", 10)
+    add_method("Adj Bar", 11)
+    add_method("Opp Bar", 12)
+    add_method("Diag", 13)
+    add_method("Adj Diag", 14)
 
     return methods2
 
