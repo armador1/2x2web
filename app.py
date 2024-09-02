@@ -412,14 +412,18 @@ def search():
     found_states = None
     error = None
 
+    states = []
+    number_results = 0
     try:
         found_states = query_states(include_tables, exclude_tables, page_number)
+        states = found_states[0]
+        number_results = found_states[1]
     except Exception as e:
-        error = str(e)
+        print(f"Exception: {str(e)}")
 
     return render_template('search.html',
-                           results_missing_states=found_states[0],
-                           number_results=found_states[1],
+                           results_missing_states=states,
+                           number_results=number_results,
                            error=error,
                            page_number=page_number,
                            include_tables=include_tables,
