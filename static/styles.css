@@ -274,3 +274,8 @@ td img {
 .bubble-adiag {
     background-color: #008080;
 }
+
+#donate-button-container {
+    display: flex;
+    justify-content: center;
+}
