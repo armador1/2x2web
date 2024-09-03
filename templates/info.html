@@ -136,7 +136,27 @@
         while rotations are lowercase). Even though we will check it later, the webpage can't assure the solution you gave us is correct, 
         so there won't be any warnings if your solution is wrong.
     </p>
-
+    <h2>How can I support you?</h2>
+    <p>
+        If you find this website helpful and valuable, we encourage you to consider donating to help us maintain and
+        enhance it. Your support enables us to continue offering quality content and covering the expenses of running
+        the site. Every contribution makes a difference, and we sincerely appreciate your generosity!
+    </p>
+    <div id="donate-button-container">
+        <div id="donate-button"></div>
+        <script src="https://www.paypalobjects.com/donate/sdk/donate-sdk.js" charset="UTF-8"></script>
+        <script>
+            PayPal.Donation.Button({
+            env:'production',
+            hosted_button_id:'DN9SK7HZH9DUJ',
+            image: {
+            src:'https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif',
+            alt:'Donate with PayPal button',
+            title:'PayPal',
+            }
+            }).render('#donate-button');
+        </script>
+    </div>
 
 
 
